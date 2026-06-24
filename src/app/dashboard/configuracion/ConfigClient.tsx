@@ -58,58 +58,60 @@ export function ConfigClient({ session, initialConfigs }: { session: any, initia
   return (
     <div className="grid lg:grid-cols-2 gap-8 mt-8 items-start">
       {/* SECCIÓN DATOS EMPRESA */}
-      <div className="bg-white p-8 rounded-2xl shadow-sm border border-zinc-200 relative">
-        <div className="flex flex-col md:flex-row md:justify-between items-start mb-6 gap-4">
-          <div>
-            <h2 className="text-xl font-bold text-zinc-900">Datos de la Empresa</h2>
-            <p className="text-sm text-zinc-500 mt-1">Esta información aparecerá al final de todos los presupuestos emitidos en PDF.</p>
-          </div>
-          {session?.rol === 'ADMIN' && (
-            !editingCompany ? (
-              <Button variant="outline" size="sm" onClick={() => setEditingCompany(true)}>
-                <Pencil className="w-4 h-4 mr-2" /> Editar Textos
-              </Button>
-            ) : (
-              <div className="flex gap-2">
-                <Button variant="ghost" size="sm" onClick={() => {
-                  setEditingCompany(false);
-                  setFacturacion(initialConfigs['DATOS_FACTURACION'] || '');
-                  setPago(initialConfigs['DATOS_PAGO'] || '');
-                }}>
-                  <X className="w-4 h-4 mr-2" /> Cancelar
+      {session?.rol === 'ADMIN' && (
+        <div className="bg-white p-8 rounded-2xl shadow-sm border border-zinc-200 relative">
+          <div className="flex flex-col md:flex-row md:justify-between items-start mb-6 gap-4">
+            <div>
+              <h2 className="text-xl font-bold text-zinc-900">Datos de la Empresa</h2>
+              <p className="text-sm text-zinc-500 mt-1">Esta información aparecerá al final de todos los presupuestos emitidos en PDF.</p>
+            </div>
+            {session?.rol === 'ADMIN' && (
+              !editingCompany ? (
+                <Button variant="outline" size="sm" onClick={() => setEditingCompany(true)}>
+                  <Pencil className="w-4 h-4 mr-2" /> Editar Textos
                 </Button>
-                <Button size="sm" onClick={handleSaveCompany} disabled={savingCompany} className="bg-blue-600 hover:bg-blue-700">
-                  {savingCompany ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                  Guardar
-                </Button>
-              </div>
-            )
-          )}
-        </div>
-
-        {companyMsg && <div className="mb-6 p-3 bg-green-50 text-green-700 border border-green-200 rounded-md text-sm font-medium">{companyMsg}</div>}
-
-        <div className="flex flex-col gap-6">
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-zinc-800">Datos de Facturación</label>
-            <Textarea 
-              value={facturacion} 
-              onChange={e => setFacturacion(e.target.value)} 
-              disabled={!editingCompany}
-              className={`h-32 resize-none text-zinc-700 ${!editingCompany ? 'bg-zinc-50 border-transparent shadow-none cursor-not-allowed font-medium opacity-90' : 'bg-white'}`}
-            />
+              ) : (
+                <div className="flex gap-2">
+                  <Button variant="ghost" size="sm" onClick={() => {
+                    setEditingCompany(false);
+                    setFacturacion(initialConfigs['DATOS_FACTURACION'] || '');
+                    setPago(initialConfigs['DATOS_PAGO'] || '');
+                  }}>
+                    <X className="w-4 h-4 mr-2" /> Cancelar
+                  </Button>
+                  <Button size="sm" onClick={handleSaveCompany} disabled={savingCompany} className="bg-blue-600 hover:bg-blue-700">
+                    {savingCompany ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                    Guardar
+                  </Button>
+                </div>
+              )
+            )}
           </div>
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-zinc-800">Datos de Pago (Cuenta Bancaria)</label>
-            <Textarea 
-              value={pago} 
-              onChange={e => setPago(e.target.value)} 
-              disabled={!editingCompany}
-              className={`h-32 resize-none text-zinc-700 ${!editingCompany ? 'bg-zinc-50 border-transparent shadow-none cursor-not-allowed font-medium opacity-90' : 'bg-white'}`}
-            />
+
+          {companyMsg && <div className="mb-6 p-3 bg-green-50 text-green-700 border border-green-200 rounded-md text-sm font-medium">{companyMsg}</div>}
+
+          <div className="flex flex-col gap-6">
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-zinc-800">Datos de Facturación</label>
+              <Textarea 
+                value={facturacion} 
+                onChange={e => setFacturacion(e.target.value)} 
+                disabled={!editingCompany}
+                className={`h-32 resize-none text-zinc-700 ${!editingCompany ? 'bg-zinc-50 border-transparent shadow-none cursor-not-allowed font-medium opacity-90' : 'bg-white'}`}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-zinc-800">Datos de Pago (Cuenta Bancaria)</label>
+              <Textarea 
+                value={pago} 
+                onChange={e => setPago(e.target.value)} 
+                disabled={!editingCompany}
+                className={`h-32 resize-none text-zinc-700 ${!editingCompany ? 'bg-zinc-50 border-transparent shadow-none cursor-not-allowed font-medium opacity-90' : 'bg-white'}`}
+              />
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* SECCIÓN SEGURIDAD */}
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-zinc-200">

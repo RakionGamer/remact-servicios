@@ -1,6 +1,7 @@
 import { getClientes } from '@/actions/clientes';
 import { ClienteFormModal } from '@/components/clientes/ClienteFormModal';
 import { ClientesTable } from '@/components/clientes/ClientesTable';
+import { getSession } from '@/actions/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,6 +10,9 @@ export default async function ClientesPage({ searchParams }: { searchParams: Pro
   const query = params?.q?.toLowerCase() || '';
   const res = await getClientes();
   let clientes = res.success && res.data ? res.data : [];
+
+  const session = await getSession();
+  const isAdmin = session?.rol === 'ADMIN';
 
   if (query) {
     clientes = clientes.filter((c: any) => 
@@ -24,7 +28,7 @@ export default async function ClientesPage({ searchParams }: { searchParams: Pro
         <ClienteFormModal />
       </div>
 
-      <ClientesTable initialClientes={clientes} />
+      <ClientesTable initialClientes={clientes} isAdmin={isAdmin} />
     </div>
   );
 }

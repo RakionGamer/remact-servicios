@@ -30,7 +30,7 @@ export async function AppSidebar() {
 
   const filteredItems = items.filter(item => {
     if (isAdmin) return true;
-    return ['Inicio', 'Presupuestos', 'Configuración'].includes(item.title);
+    return ['Inicio', 'Clientes', 'Presupuestos', 'Configuración'].includes(item.title);
   });
 
   return (

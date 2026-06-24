@@ -22,9 +22,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 interface Props {
   initialClientes: any[];
+  isAdmin?: boolean;
 }
 
-export function ClientesTable({ initialClientes }: Props) {
+export function ClientesTable({ initialClientes, isAdmin = false }: Props) {
   const [clientes, setClientes] = useState<any[]>(initialClientes);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -113,18 +114,20 @@ export function ClientesTable({ initialClientes }: Props) {
                         onRevert={handleRevert}
                         onSuccess={handleSuccess}
                       />
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost" size="sm"
-                            onClick={() => setDeleteId(cliente.id)}
-                            className="px-2 text-zinc-500 hover:text-red-600 hover:bg-red-50"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent><p>Eliminar cliente</p></TooltipContent>
-                      </Tooltip>
+                      {isAdmin && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost" size="sm"
+                              onClick={() => setDeleteId(cliente.id)}
+                              className="px-2 text-zinc-500 hover:text-red-600 hover:bg-red-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent><p>Eliminar cliente</p></TooltipContent>
+                        </Tooltip>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

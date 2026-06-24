@@ -114,6 +114,11 @@ export async function updateCliente(id: number, data: any) {
 
 export async function deleteCliente(id: number) {
   try {
+    const { getSession } = await import('@/actions/auth');
+    const session = await getSession();
+    if (session?.rol !== 'ADMIN') {
+      return { success: false, error: 'No tienes permisos para eliminar clientes' };
+    }
     await pool.query('DELETE FROM clientes WHERE id = ?', [id]);
     revalidatePath('/dashboard/clientes');
     return { success: true, deleted: 'hard' as const };
