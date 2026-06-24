@@ -23,17 +23,22 @@ export function ServiciosSelectionModal({ servicios, initialSelectedIds, onAddSe
   const [sliderStyle, setSliderStyle] = useState({ left: 0, width: 0, opacity: 0 });
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-    const btn = container.querySelector(`button[data-value="${filterCaracteristica}"]`) as HTMLButtonElement;
-    if (btn) {
-      setSliderStyle({
-        left: btn.offsetLeft,
-        width: btn.offsetWidth,
-        opacity: 1
-      });
+    const updateSlider = () => {
+      const container = containerRef.current;
+      if (!container) return;
+      const btn = container.querySelector(`button[data-value="${filterCaracteristica}"]`) as HTMLButtonElement;
+      if (btn && btn.offsetWidth > 0) {
+        setSliderStyle({
+          left: btn.offsetLeft,
+          width: btn.offsetWidth,
+          opacity: 1
+        });
+      }
+    };
+    if (open) {
+      setTimeout(updateSlider, 50);
     }
-  }, [filterCaracteristica]);
+  }, [filterCaracteristica, open]);
 
   // Filter services based on search query and characteristic
   const filteredServicios = useMemo(() => {
@@ -108,19 +113,19 @@ export function ServiciosSelectionModal({ servicios, initialSelectedIds, onAddSe
 
           </DialogHeader>
 
-          <div className="flex flex-col sm:flex-row gap-3 mt-4">
-            <div className="relative flex-1">
+          <div className="flex flex-col sm:flex-row items-center gap-3 mt-4">
+            <div className="relative flex-1 w-full sm:w-auto">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
               <Input
                 placeholder="Buscar por nombre o categoría..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="pl-9"
+                className="pl-9 h-10 w-full"
               />
             </div>
-            <div ref={containerRef} className="relative inline-flex p-1 bg-zinc-100/80 dark:bg-zinc-800/80 rounded-lg shrink-0">
+            <div ref={containerRef} className="relative inline-flex items-center p-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg shrink-0 h-10">
               <div
-                className="absolute top-1 bottom-1 bg-zinc-900 dark:bg-white rounded-md shadow-sm transition-all duration-300 ease-out"
+                className="absolute top-1 bottom-1 bg-zinc-900 dark:bg-zinc-100 rounded-md shadow-sm transition-all duration-300 ease-out"
                 style={{
                   left: `${sliderStyle.left}px`,
                   width: `${sliderStyle.width}px`,
@@ -197,18 +202,25 @@ export function ServiciosSelectionModal({ servicios, initialSelectedIds, onAddSe
                       />
                     </div>
                     <div className="flex-1 flex justify-between items-start gap-4">
-                      <div>
+                      <div className="flex-1 min-w-0">
                         <p className="font-semibold text-sm text-zinc-900">{s.item}</p>
-                        {s.categoria && (
-                          <span className="inline-flex items-center px-2 py-0.5 mt-1 rounded text-[10px] font-medium bg-zinc-100 text-zinc-600">
-                            {s.categoria}
-                          </span>
-                        )}
-                        {s.caracteristica && (
-                          <span className="inline-flex items-center px-2 py-0.5 mt-1 ml-2 rounded text-[10px] font-medium bg-blue-50 text-blue-700">
-                            {s.caracteristica}
-                          </span>
-                        )}
+                        <div className="flex flex-wrap items-center gap-2 mt-1">
+                          {s.categoria && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-zinc-100 text-zinc-600">
+                              {s.categoria}
+                            </span>
+                          )}
+                          {s.caracteristica && (
+                            <span className={cn(
+                              "inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium",
+                              s.caracteristica === 'Empresa' ? "bg-zinc-900 text-white" : 
+                              s.caracteristica === 'Particular' ? "bg-red-700 text-white" : 
+                              "bg-blue-50 text-blue-700"
+                            )}>
+                              {s.caracteristica}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div className="text-right whitespace-nowrap">
                         <p className="font-bold text-sm text-emerald-700">{formatMoney(parseFloat(s.valor_unitario || 0))}</p>

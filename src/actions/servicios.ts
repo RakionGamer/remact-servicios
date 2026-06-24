@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 
 export async function getServicios() {
   try {
-    const [rows] = await pool.query('SELECT * FROM servicios WHERE activo = 1 ORDER BY id DESC');
+    const [rows] = await pool.query('SELECT * FROM servicios ORDER BY id DESC');
     return { success: true, data: rows as any[] };
   } catch (error: any) {
     console.error('Error fetching servicios:', error);
@@ -46,7 +46,7 @@ export async function updateServicio(id: number, data: any) {
 
 export async function deleteServicio(id: number) {
   try {
-    await pool.query('UPDATE servicios SET activo = 0 WHERE id = ?', [id]);
+    await pool.query('DELETE FROM servicios WHERE id = ?', [id]);
     revalidatePath('/dashboard/servicios');
     return { success: true };
   } catch (error: any) {

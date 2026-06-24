@@ -1,16 +1,18 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, Building2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface Cliente {
   id: number;
   razon_social: string;
   identificador_fiscal: string;
   correo: string;
+  tipo_cliente?: string;
 }
 
 interface ClienteSelectionModalProps {
@@ -22,16 +24,47 @@ interface ClienteSelectionModalProps {
 export function ClienteSelectionModal({ clientes, onSelectCliente, triggerButton }: ClienteSelectionModalProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [filterTipo, setFilterTipo] = useState<'Todas' | 'Empresa' | 'Natural'>('Todas');
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [sliderStyle, setSliderStyle] = useState({ left: 0, width: 0, opacity: 0 });
+
+  useEffect(() => {
+    const updateSlider = () => {
+      const container = containerRef.current;
+      if (!container) return;
+      const btn = container.querySelector(`button[data-value="${filterTipo}"]`) as HTMLButtonElement;
+      if (btn && btn.offsetWidth > 0) {
+        setSliderStyle({
+          left: btn.offsetLeft,
+          width: btn.offsetWidth,
+          opacity: 1
+        });
+      }
+    };
+    if (open) {
+      setTimeout(updateSlider, 50);
+    }
+  }, [filterTipo, open]);
 
   const filteredClientes = useMemo(() => {
-    if (!query) return clientes;
-    const lowerQuery = query.toLowerCase();
-    return clientes.filter(c =>
-      c.razon_social?.toLowerCase().includes(lowerQuery) ||
-      c.identificador_fiscal?.toLowerCase().includes(lowerQuery) ||
-      c.correo?.toLowerCase().includes(lowerQuery)
-    );
-  }, [clientes, query]);
+    let result = clientes;
+    if (filterTipo === 'Empresa') {
+      result = result.filter(c => c.tipo_cliente === 'JURIDICA');
+    } else if (filterTipo === 'Natural') {
+      result = result.filter(c => c.tipo_cliente === 'NATURAL');
+    }
+
+    if (query) {
+      const lowerQuery = query.toLowerCase();
+      result = result.filter(c =>
+        c.razon_social?.toLowerCase().includes(lowerQuery) ||
+        c.identificador_fiscal?.toLowerCase().includes(lowerQuery) ||
+        c.correo?.toLowerCase().includes(lowerQuery)
+      );
+    }
+    return result;
+  }, [clientes, query, filterTipo]);
 
   const handleSelect = (cliente: Cliente) => {
     onSelectCliente(cliente);
@@ -64,15 +97,65 @@ export function ClienteSelectionModal({ clientes, onSelectCliente, triggerButton
             </DialogDescription>
           </DialogHeader>
 
-          <div className="relative mt-4">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
-            <Input
-              placeholder="Buscar por empresa, RUT o correo..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="pl-9"
-              autoFocus
-            />
+          <div className="flex flex-col sm:flex-row items-center gap-3 mt-4">
+            <div className="relative flex-1 w-full sm:w-auto">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+              <Input
+                placeholder="Buscar por empresa, RUT o correo..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="pl-9 h-10 w-full"
+                autoFocus
+              />
+            </div>
+
+            <div ref={containerRef} className="relative inline-flex items-center p-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg shrink-0 h-10">
+              <div
+                className="absolute top-1 bottom-1 bg-zinc-900 dark:bg-zinc-100 rounded-md shadow-sm transition-all duration-300 ease-out"
+                style={{
+                  left: `${sliderStyle.left}px`,
+                  width: `${sliderStyle.width}px`,
+                  opacity: sliderStyle.opacity,
+                  transform: sliderStyle.opacity ? 'scale(1)' : 'scale(0.95)'
+                }}
+              />
+              <button
+                type="button"
+                data-value="Todas"
+                onClick={() => setFilterTipo('Todas')}
+                className={`relative px-4 h-8 flex items-center justify-center text-sm font-medium rounded-md transition-colors duration-200 ${
+                  filterTipo === 'Todas'
+                    ? 'text-white dark:text-zinc-900'
+                    : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
+                }`}
+              >
+                Todas
+              </button>
+              <button
+                type="button"
+                data-value="Empresa"
+                onClick={() => setFilterTipo('Empresa')}
+                className={`relative px-4 h-8 flex items-center justify-center text-sm font-medium rounded-md transition-colors duration-200 ${
+                  filterTipo === 'Empresa'
+                    ? 'text-white dark:text-zinc-900'
+                    : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
+                }`}
+              >
+                Empresa
+              </button>
+              <button
+                type="button"
+                data-value="Natural"
+                onClick={() => setFilterTipo('Natural')}
+                className={`relative px-4 h-8 flex items-center justify-center text-sm font-medium rounded-md transition-colors duration-200 ${
+                  filterTipo === 'Natural'
+                    ? 'text-white dark:text-zinc-900'
+                    : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
+                }`}
+              >
+                Natural
+              </button>
+            </div>
           </div>
         </div>
 
@@ -96,12 +179,18 @@ export function ClienteSelectionModal({ clientes, onSelectCliente, triggerButton
                       <Building2 className="w-4 h-4" />
                     </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="font-bold text-sm text-zinc-900">{c.razon_social}</p>
-                    <p className="text-xs text-zinc-500 mt-0.5">{c.identificador_fiscal}</p>
-                    <div className="flex items-center gap-0.5 mt-0.5">
-                      <p className="text-xs font-medium text-zinc-600">{c.correo || 'Sin correo'}</p>
-                    </div>
+                  <div className="flex-1 min-w-0 flex flex-col items-start gap-1">
+                    <p className="font-bold text-sm text-zinc-900 truncate w-full">{c.razon_social}</p>
+                    {c.tipo_cliente && (
+                      <span className={cn(
+                        "inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium shrink-0",
+                        c.tipo_cliente === 'JURIDICA' ? "bg-zinc-900 text-white" : 
+                        c.tipo_cliente === 'NATURAL' ? "bg-red-700 text-white" : 
+                        "bg-blue-50 text-blue-700"
+                      )}>
+                        {c.tipo_cliente === 'JURIDICA' ? 'Empresa' : c.tipo_cliente === 'NATURAL' ? 'Natural' : c.tipo_cliente}
+                      </span>
+                    )}
                   </div>
                 </div>
               ))}

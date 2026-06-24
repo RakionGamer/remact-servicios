@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { createCliente } from '@/actions/clientes';
-import { Loader2 } from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
 import { formatRUT } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -17,6 +17,20 @@ export function ClienteFormModal() {
   const [rutValue, setRutValue] = useState('');
   const [nombreValue, setNombreValue] = useState('');
   const [telefonoValue, setTelefonoValue] = useState('');
+  const [direcciones, setDirecciones] = useState<string[]>(['']);
+
+  const handleDireccionChange = (index: number, value: string) => {
+    const newDirs = [...direcciones];
+    newDirs[index] = value;
+    setDirecciones(newDirs);
+  };
+
+  const addDireccion = () => setDirecciones([...direcciones, '']);
+  const removeDireccion = (index: number) => {
+    if (direcciones.length > 1) {
+      setDirecciones(direcciones.filter((_, i) => i !== index));
+    }
+  };
 
   const handleOpenChange = (v: boolean) => {
     if (v) {
@@ -25,6 +39,7 @@ export function ClienteFormModal() {
       setRutValue('');
       setNombreValue('');
       setTelefonoValue('');
+      setDirecciones(['']);
     }
     setOpen(v);
   };
@@ -73,7 +88,7 @@ export function ClienteFormModal() {
       razon_social: nombreValue,
       nombre_contacto: null,
       giro: null,
-      direccion: formData.get('direccion'),
+      direcciones: direcciones.filter(d => d.trim() !== ''),
       telefono: '+56' + telefonoValue,
       correo: formData.get('correo'),
     };
@@ -134,21 +149,19 @@ export function ClienteFormModal() {
             </div>
 
             <div className="space-y-1.5 col-span-2 sm:col-span-1">
-              <label className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">RUT <span className="text-red-500">*</span></label>
+              <label className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">RUT</label>
               <Input
                 name="identificador_fiscal"
                 value={rutValue}
                 onChange={handleRutChange}
                 maxLength={12}
-                minLength={9}
-                required
-                placeholder="Ej: 12.345.678-9"
+                placeholder="Ej: 12.345.678-9 (Opcional)"
                 className="h-10"
               />
             </div>
 
             {/* Fila 2 */}
-            <div className="space-y-1.5 col-span-2 sm:col-span-1">
+            <div className="space-y-1.5 col-span-2">
               <label className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
                 {tipoCliente === 'NATURAL' ? 'Nombre Completo ' : 'Razón Social '}
                 <span className="text-red-500">*</span>
@@ -163,9 +176,31 @@ export function ClienteFormModal() {
               />
             </div>
 
-            <div className="space-y-1.5 col-span-2 sm:col-span-1">
-              <label className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Dirección <span className="text-red-500">*</span></label>
-              <Input name="direccion" required placeholder="Calle, Número, Región" className="h-10" />
+            <div className="space-y-1.5 col-span-2">
+              <div className="flex justify-between items-center">
+                <label className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Direcciones <span className="text-red-500">*</span></label>
+                <Button type="button" variant="ghost" size="sm" onClick={addDireccion} className="h-6 px-2 text-xs">
+                  + Agregar otra dirección
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {direcciones.map((dir, index) => (
+                  <div key={index} className="flex gap-2">
+                    <Input 
+                      value={dir}
+                      onChange={(e) => handleDireccionChange(index, e.target.value)}
+                      required={index === 0} 
+                      placeholder={index === 0 ? "Dirección Principal (Calle, Número, Región)" : "Otra dirección (Opcional)"} 
+                      className="h-10 flex-1" 
+                    />
+                    {index > 0 && (
+                      <Button type="button" variant="outline" size="icon" className="h-10 w-10 shrink-0 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100" onClick={() => removeDireccion(index)}>
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Fila 3 */}

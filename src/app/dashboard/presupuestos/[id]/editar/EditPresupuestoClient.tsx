@@ -8,13 +8,14 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { getServicios } from '@/actions/servicios';
-import { getClientes } from '@/actions/clientes';
+import { getClientes, getClienteById } from '@/actions/clientes';
 import { updatePresupuesto } from '@/actions/presupuestos';
 import { Loader2, Trash2, Calendar as CalendarIcon, Search, Building2, Save, Pencil } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { ServiciosSelectionModal } from '@/components/presupuestos/ServiciosSelectionModal';
 import { ClienteSelectionModal } from '@/components/presupuestos/ClienteSelectionModal';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from '@/lib/utils';
@@ -37,6 +38,7 @@ export default function EditPresupuestoClient({ initialData, userRole }: { initi
     identificador_fiscal: initialData.cliente_rut
   });
   const [clienteId, setClienteId] = useState(initialData.cliente_id?.toString() || '');
+  const [direccionSeleccionada, setDireccionSeleccionada] = useState(initialData.cliente_direccion || '');
   const [solicitadoPor, setSolicitadoPor] = useState(initialData.solicitado_por || '');
   const [fecha, setFecha] = useState<Date | undefined>(new Date(initialData.fecha_emision));
   const [motivo, setMotivo] = useState(initialData.motivo_servicio || '');
@@ -58,25 +60,43 @@ export default function EditPresupuestoClient({ initialData, userRole }: { initi
   useEffect(() => {
     getClientes().then(res => { if (res.success) setClientes(res.data || []) });
     getServicios().then(res => { if (res.success) setServicios(res.data || []) });
-  }, []);
 
-  const handleSelectCliente = (cliente: any) => {
+    if (initialData.cliente_id) {
+      getClienteById(initialData.cliente_id).then(res => {
+        if (res.success && res.data) {
+          setClienteSeleccionado(res.data);
+          if (!initialData.cliente_direccion && res.data.direcciones && res.data.direcciones.length > 0) {
+            setDireccionSeleccionada(res.data.direcciones[0]);
+          }
+        }
+      });
+    }
+  }, [initialData.cliente_id, initialData.cliente_direccion]);
+
+  const handleSelectCliente = async (cliente: any) => {
     setClienteSeleccionado(cliente);
     setClienteId(cliente.id.toString());
+    setDireccionSeleccionada(cliente.direccion || '');
+
+    const res = await getClienteById(cliente.id);
+    if (res.success && res.data) {
+      setClienteSeleccionado(res.data);
+      if (res.data.direcciones && res.data.direcciones.length > 0) {
+        setDireccionSeleccionada(res.data.direcciones[0]);
+      }
+    }
   };
 
   const handleUpdateServicios = (selectedServicios: any[]) => {
     const nextDetalles = [];
     const selectedIds = new Set(selectedServicios.map(s => s.id.toString()));
 
-    // 1. Keep existing details that are still selected (preserves user edits to quantity/price)
     for (const d of detalles) {
       if (selectedIds.has(d.servicio_id)) {
         nextDetalles.push(d);
       }
     }
 
-    // 2. Add new details for newly selected services
     const existingIds = new Set(nextDetalles.map(d => d.servicio_id));
     for (const s of selectedServicios) {
       if (!existingIds.has(s.id.toString())) {
@@ -102,8 +122,6 @@ export default function EditPresupuestoClient({ initialData, userRole }: { initi
     setDetalles(detalles.map(d => {
       if (d.id === id) {
         const updated = { ...d, [field]: value };
-
-        // Recalculate line total
         updated.total_linea = Number(updated.cantidad) * Number(updated.precio_unitario);
         return updated;
       }
@@ -111,7 +129,6 @@ export default function EditPresupuestoClient({ initialData, userRole }: { initi
     }));
   };
 
-  // Calculations
   const subtotal = detalles.reduce((acc, d) => acc + d.total_linea, 0);
   const iva = tipoDocumento === 'FACTURA' ? 0.19 : 0;
   const impuestoTotal = subtotal * iva;
@@ -132,6 +149,7 @@ export default function EditPresupuestoClient({ initialData, userRole }: { initi
 
     const data = {
       cliente_id: parseInt(clienteId),
+      direccion_historica: direccionSeleccionada,
       solicitado_por: solicitadoPor || '',
       fecha_emision: fecha ? format(fecha, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
       motivo_servicio: motivo,
@@ -153,10 +171,8 @@ export default function EditPresupuestoClient({ initialData, userRole }: { initi
     if (res.success) {
       toast.success('Presupuesto guardado correctamente');
       
-      // Invalidate local cache immediately so the viewer page refetches
       queryClient.invalidateQueries({ queryKey: ['presupuesto', initialData.id] });
 
-      // Emit websocket event to notify other viewers
       const socket = ClientIO(process.env.NEXT_PUBLIC_SITE_URL || undefined, {
         path: '/api/socket/io',
         addTrailingSlash: false,
@@ -192,7 +208,6 @@ export default function EditPresupuestoClient({ initialData, userRole }: { initi
       )}
 
       <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-6 space-y-8">
-        {/* Cabecera del Documento */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-zinc-800">Cliente <span className="text-red-500">*</span></label>
@@ -204,25 +219,65 @@ export default function EditPresupuestoClient({ initialData, userRole }: { initi
                   type="button"
                   variant="outline"
                   className={cn(
-                    "w-full justify-start text-left font-normal bg-white h-auto min-h-10 border-zinc-200 shadow-sm py-2",
+                    "w-full justify-start text-left font-normal bg-white h-10 border-zinc-200 shadow-sm truncate",
                     !clienteSeleccionado && "text-zinc-500"
                   )}
                 >
                   <Search className="w-4 h-4 mr-2 opacity-50 shrink-0" />
                   {clienteSeleccionado ? (
-                    <span className="flex flex-col items-start md:flex-row md:items-center md:gap-2">
-                      <span className="text-zinc-900 font-semibold text-sm">{clienteSeleccionado.razon_social}</span>
-                      <span className="hidden md:inline text-zinc-300">|</span>
-                      <span className="flex items-center gap-1 text-xs md:text-sm text-zinc-500 font-normal">
-                        RUT: {clienteSeleccionado.identificador_fiscal}
-                      </span>
-                    </span>
+                    <div className="flex items-center gap-2 truncate">
+                      <span className="text-zinc-900 font-semibold text-sm truncate">{clienteSeleccionado.razon_social}</span>
+                      {clienteSeleccionado.identificador_fiscal && (
+                        <>
+                          <span className="text-zinc-400 hidden sm:inline">-</span>
+                          <span className="text-xs text-zinc-500 font-normal truncate">
+                            RUT: {clienteSeleccionado.identificador_fiscal}
+                          </span>
+                        </>
+                      )}
+                    </div>
                   ) : (
                     <span>Seleccionar cliente...</span>
                   )}
                 </Button>
               }
             />
+          </div>
+
+          <div className="space-y-1.5 flex flex-col justify-end">
+            <label className="text-sm font-semibold text-zinc-800">Dirección a asociar <span className="text-red-500">*</span></label>
+            <Select 
+              value={direccionSeleccionada}
+              onValueChange={setDireccionSeleccionada}
+              disabled={!clienteSeleccionado || !clienteSeleccionado.direcciones || clienteSeleccionado.direcciones.length <= 1}
+            >
+              <SelectTrigger className="w-full bg-white h-10 shadow-sm border-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                <SelectValue placeholder={!clienteSeleccionado ? "Selecciona un cliente primero" : "Selecciona una dirección"} />
+              </SelectTrigger>
+              <SelectContent position="popper" side="bottom">
+                {clienteSeleccionado?.direcciones?.map((dir: string, i: number) => (
+                  <SelectItem key={i} value={dir}>{dir} {i === 0 ? '(Principal)' : ''}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-semibold text-zinc-800">Nombre del Solicitante</label>
+            <div className="relative">
+              <Input disabled={!isSolicitadoEditable} value={solicitadoPor} onChange={e => setSolicitadoPor(e.target.value)} placeholder="Ej: Juan Carlos" className="h-10 bg-white pr-10 disabled:opacity-70 disabled:cursor-not-allowed" />
+              <button
+                type="button"
+                onClick={() => setIsSolicitadoEditable(!isSolicitadoEditable)}
+                className={cn(
+                  "absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 rounded-md transition-colors",
+                  isSolicitadoEditable ? "bg-blue-100 text-blue-700" : "text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100"
+                )}
+                title="Editar"
+              >
+                <Pencil className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           <div className="space-y-1.5 flex flex-col justify-end">
@@ -251,25 +306,7 @@ export default function EditPresupuestoClient({ initialData, userRole }: { initi
             </Popover>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-sm font-semibold text-zinc-800">Nombre del Solicitante</label>
-            <div className="relative">
-              <Input disabled={!isSolicitadoEditable} value={solicitadoPor} onChange={e => setSolicitadoPor(e.target.value)} placeholder="Ej: Juan Carlos" className="h-10 bg-white pr-10 disabled:opacity-70 disabled:cursor-not-allowed" />
-              <button
-                type="button"
-                onClick={() => setIsSolicitadoEditable(!isSolicitadoEditable)}
-                className={cn(
-                  "absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 rounded-md transition-colors",
-                  isSolicitadoEditable ? "bg-blue-100 text-blue-700" : "text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100"
-                )}
-                title="Editar"
-              >
-                <Pencil className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 col-span-1 md:col-span-2">
             <label className="text-sm font-semibold text-zinc-800">Motivo del Servicio u Obra</label>
             <div className="relative">
               <Input disabled={!isMotivoEditable} value={motivo} onChange={e => setMotivo(e.target.value)} placeholder="Ej: Remodelación Oficina Central" className="h-10 bg-white pr-10 disabled:opacity-70 disabled:cursor-not-allowed" />
@@ -290,7 +327,6 @@ export default function EditPresupuestoClient({ initialData, userRole }: { initi
 
         <hr className="border-zinc-200" />
 
-        {/* Detalles / Ítems */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold tracking-tight">Ítems a Cotizar</h2>
@@ -367,7 +403,6 @@ export default function EditPresupuestoClient({ initialData, userRole }: { initi
 
         <hr className="border-zinc-200" />
 
-        {/* Resumen Total y Condiciones */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-zinc-800">Condiciones Comerciales</label>
@@ -386,6 +421,15 @@ export default function EditPresupuestoClient({ initialData, userRole }: { initi
                 onClick={() => setCondiciones((prev: string) => prev + (prev ? '\n\n' : '') + 'Este presupuesto tiene una vigencia de 07 días continuos')}
               >
                 + Vigencia 7 días
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="text-xs bg-zinc-50 hover:bg-zinc-100 h-auto py-1.5 px-3 text-zinc-600 text-left"
+                onClick={() => setCondiciones((prev: string) => prev + (prev ? '\n\n' : '') + 'Validez de la oferta: 15 días hábiles.\nForma de pago: 50% anticipo, 50% al finalizar.')}
+              >
+                + Condiciones estándar
               </Button>
               <Button
                 type="button"

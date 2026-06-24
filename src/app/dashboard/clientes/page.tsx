@@ -1,4 +1,4 @@
-import { getClientes, getClientesInactivos } from '@/actions/clientes';
+import { getClientes } from '@/actions/clientes';
 import { ClienteFormModal } from '@/components/clientes/ClienteFormModal';
 import { ClientesTable } from '@/components/clientes/ClientesTable';
 
@@ -9,9 +9,6 @@ export default async function ClientesPage({ searchParams }: { searchParams: Pro
   const query = params?.q?.toLowerCase() || '';
   const res = await getClientes();
   let clientes = res.success && res.data ? res.data : [];
-
-  const resInactivos = await getClientesInactivos();
-  const inactivos = resInactivos.success && resInactivos.data ? resInactivos.data : [];
 
   if (query) {
     clientes = clientes.filter((c: any) => 
@@ -27,7 +24,7 @@ export default async function ClientesPage({ searchParams }: { searchParams: Pro
         <ClienteFormModal />
       </div>
 
-      <ClientesTable initialClientes={clientes} initialInactivos={inactivos} />
+      <ClientesTable initialClientes={clientes} />
     </div>
   );
 }

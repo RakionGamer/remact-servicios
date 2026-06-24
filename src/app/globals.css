@@ -120,6 +120,8 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    scrollbar-color: #27272a #f1f1f1;
+    scrollbar-width: thin;
   }
 
   body {
@@ -131,7 +133,26 @@
   }
 }
 
-/* Custom Red Scrollbar for Dual Scroll Container */
+/* Global Dark Scrollbar */
+::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #09090b;
+}
+
+/* Custom Dark Scrollbar for Dual Scroll Container */
 .custom-scrollbar::-webkit-scrollbar {
   height: 6px;
   width: 6px;
@@ -143,12 +164,12 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #ed0e2c;
+  background: #27272a;
   border-radius: 5px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #c70b24;
+  background: #09090b;
 }
 
 @page {

@@ -5,7 +5,7 @@ USE remact_servicios;
 CREATE TABLE IF NOT EXISTS clientes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     tipo_cliente ENUM('NATURAL', 'JURIDICA') NOT NULL,
-    identificador_fiscal VARCHAR(20) NOT NULL UNIQUE,
+    identificador_fiscal VARCHAR(20) NULL UNIQUE,
     razon_social VARCHAR(255) NOT NULL,
     nombre_contacto VARCHAR(255) NULL,
     giro VARCHAR(255) NULL,

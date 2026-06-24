@@ -94,7 +94,7 @@ export function ServicioFormModal() {
             <Input name="item" required placeholder="Ej: Pintura de Muro" className="h-10" />
           </div>
 
-          <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
             <label className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Característica <span className="text-muted-foreground font-normal">(Opcional)</span></label>
             <input type="hidden" name="caracteristica" value={caracteristica} />
             <div ref={containerRef} className="relative inline-flex p-1 bg-zinc-100/80 dark:bg-zinc-800/80 rounded-lg">

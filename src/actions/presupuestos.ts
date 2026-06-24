@@ -7,10 +7,13 @@ import { getSession } from '@/actions/auth';
 export async function getPresupuestos() {
   try {
     const [rows] = await pool.query(`
-      SELECT p.*, c.razon_social as cliente_nombre, c.identificador_fiscal as cliente_rut,
-             v.nombre as vendedor_nombre, a.nombre as aprobador_nombre
+      SELECT p.*, 
+             COALESCE(p.cliente_razon_social, c.razon_social) as cliente_nombre, 
+             COALESCE(p.cliente_identificador, c.identificador_fiscal) as cliente_rut,
+             v.nombre as vendedor_nombre, a.nombre as aprobador_nombre,
+             COALESCE(p.direccion_historica, (SELECT direccion FROM direcciones_cliente dc WHERE dc.cliente_id = p.cliente_id ORDER BY es_principal DESC LIMIT 1)) as cliente_direccion
       FROM presupuestos p
-      JOIN clientes c ON p.cliente_id = c.id
+      LEFT JOIN clientes c ON p.cliente_id = c.id
       LEFT JOIN usuarios v ON p.vendedor_id = v.id
       LEFT JOIN usuarios a ON p.aprobador_id = a.id
       ORDER BY p.id DESC
@@ -24,11 +27,16 @@ export async function getPresupuestos() {
 export async function getPresupuestoById(id: number) {
   try {
     const [presupuestoRows] = await pool.query(`
-      SELECT p.*, c.razon_social as cliente_nombre, c.identificador_fiscal as cliente_rut, c.tipo_cliente,
-             c.direccion as cliente_direccion, c.telefono as cliente_telefono, c.correo as cliente_correo,
-             v.nombre as vendedor_nombre, a.nombre as aprobador_nombre
+      SELECT p.*, 
+             COALESCE(p.cliente_razon_social, c.razon_social) as cliente_nombre, 
+             COALESCE(p.cliente_identificador, c.identificador_fiscal) as cliente_rut, 
+             COALESCE(p.cliente_tipo, c.tipo_cliente) as tipo_cliente,
+             COALESCE(p.cliente_telefono, c.telefono) as cliente_telefono, 
+             COALESCE(p.cliente_correo, c.correo) as cliente_correo,
+             v.nombre as vendedor_nombre, a.nombre as aprobador_nombre,
+             COALESCE(p.direccion_historica, (SELECT direccion FROM direcciones_cliente dc WHERE dc.cliente_id = p.cliente_id ORDER BY es_principal DESC LIMIT 1)) as cliente_direccion
       FROM presupuestos p
-      JOIN clientes c ON p.cliente_id = c.id
+      LEFT JOIN clientes c ON p.cliente_id = c.id
       LEFT JOIN usuarios v ON p.vendedor_id = v.id
       LEFT JOIN usuarios a ON p.aprobador_id = a.id
       WHERE p.id = ?
@@ -39,9 +47,11 @@ export async function getPresupuestoById(id: number) {
     }
 
     const [detallesRows] = await pool.query(`
-      SELECT pd.*, s.item as servicio_nombre, s.unidad_medida
+      SELECT pd.*, 
+             COALESCE(pd.servicio_item, s.item) as servicio_nombre, 
+             COALESCE(pd.servicio_unidad_medida, s.unidad_medida) as unidad_medida
       FROM presupuestos_detalle pd
-      JOIN servicios s ON pd.servicio_id = s.id
+      LEFT JOIN servicios s ON pd.servicio_id = s.id
       WHERE pd.presupuestos_id = ?
     `, [id]);
 
@@ -62,36 +72,38 @@ export async function createPresupuesto(data: any) {
   try {
     await connection.beginTransaction();
 
-    const { cliente_id, fecha_emision, solicitado_por, motivo_servicio, tipo_documento, subtotal, iva, impuesto_total, total, condiciones, detalles } = data;
+    const { cliente_id, direccion_historica, fecha_emision, solicitado_por, motivo_servicio, tipo_documento, subtotal, iva, impuesto_total, total, condiciones, detalles } = data;
     const session = await getSession();
     const vendedor_id = session ? session.id : null;
 
-    // 1. Insertar el presupuesto maestro
+    const [clienteRows] = await connection.query('SELECT * FROM clientes WHERE id = ?', [cliente_id]);
+    const c = (clienteRows as any[])[0];
+
     const [headerResult] = await connection.query(
       `INSERT INTO presupuestos 
-       (cliente_id, vendedor_id, estado, fecha_emision, solicitado_por, motivo_servicio, tipo_documento, subtotal, iva, impuesto_total, total, condiciones) 
-       VALUES (?, ?, 'BORRADOR', ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [cliente_id, vendedor_id, fecha_emision, solicitado_por, motivo_servicio, tipo_documento, subtotal, iva, impuesto_total, total, condiciones]
+       (cliente_id, cliente_razon_social, cliente_identificador, cliente_correo, cliente_telefono, cliente_tipo, direccion_historica, vendedor_id, estado, fecha_emision, solicitado_por, motivo_servicio, tipo_documento, subtotal, iva, impuesto_total, total, condiciones) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'BORRADOR', ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [cliente_id, c?.razon_social || null, c?.identificador_fiscal || null, c?.correo || null, c?.telefono || null, c?.tipo_cliente || null, direccion_historica || null, vendedor_id, fecha_emision, solicitado_por, motivo_servicio, tipo_documento, subtotal, iva, impuesto_total, total, condiciones]
     );
 
     const presupuestoId = (headerResult as any).insertId;
 
-    // 2. Insertar las líneas de detalle
     for (const detalle of detalles) {
+      const [servicioRows] = await connection.query('SELECT * FROM servicios WHERE id = ?', [detalle.servicio_id]);
+      const s = (servicioRows as any[])[0];
+
       await connection.query(
         `INSERT INTO presupuestos_detalle 
-         (presupuestos_id, servicio_id, cantidad, precio_unitario_historico, total_linea) 
-         VALUES (?, ?, ?, ?, ?)`,
-        [presupuestoId, detalle.servicio_id, detalle.cantidad, detalle.precio_unitario, detalle.total_linea]
+         (presupuestos_id, servicio_id, servicio_item, servicio_caracteristica, servicio_unidad_medida, cantidad, precio_unitario_historico, total_linea) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [presupuestoId, detalle.servicio_id, s?.item || null, s?.caracteristica || null, s?.unidad_medida || null, detalle.cantidad, detalle.precio_unitario, detalle.total_linea]
       );
     }
 
-    // Si todo salió bien, guardamos los cambios de manera atómica
     await connection.commit();
     revalidatePath('/dashboard/presupuestos');
     return { success: true, insertId: presupuestoId };
   } catch (error: any) {
-    // Si algo falla, revertimos toda la transacción
     await connection.rollback();
     console.error('Error creating presupuesto:', error);
     return { success: false, error: error.message };
@@ -100,15 +112,15 @@ export async function createPresupuesto(data: any) {
   }
 }
 
-
-
 export async function getPresupuestosByCliente(cliente_id: number) {
   try {
     const [rows] = await pool.query(`
-      SELECT p.*, c.razon_social as cliente_nombre,
-             v.nombre as vendedor_nombre, a.nombre as aprobador_nombre
+      SELECT p.*, 
+             COALESCE(p.cliente_razon_social, c.razon_social) as cliente_nombre,
+             v.nombre as vendedor_nombre, a.nombre as aprobador_nombre,
+             COALESCE(p.direccion_historica, (SELECT direccion FROM direcciones_cliente dc WHERE dc.cliente_id = p.cliente_id ORDER BY es_principal DESC LIMIT 1)) as cliente_direccion
       FROM presupuestos p
-      JOIN clientes c ON p.cliente_id = c.id
+      LEFT JOIN clientes c ON p.cliente_id = c.id
       LEFT JOIN usuarios v ON p.vendedor_id = v.id
       LEFT JOIN usuarios a ON p.aprobador_id = a.id
       WHERE p.cliente_id = ?
@@ -144,7 +156,6 @@ export async function deletePresupuesto(id: number) {
   try {
     await connection.beginTransaction();
 
-    // Verify it's pending or null
     const [rows] = await connection.query('SELECT estado FROM presupuestos WHERE id = ?', [id]);
     const p = (rows as any[])[0];
     if (!p) throw new Error('Presupuesto no encontrado');
@@ -172,7 +183,6 @@ export async function updatePresupuesto(id: number, data: any) {
   try {
     await connection.beginTransaction();
 
-    // Verify it's pending or null
     const [rows] = await connection.query('SELECT estado, vendedor_id FROM presupuestos WHERE id = ?', [id]);
     const p = (rows as any[])[0];
     if (!p) throw new Error('Presupuesto no encontrado');
@@ -180,10 +190,9 @@ export async function updatePresupuesto(id: number, data: any) {
       throw new Error('Solo se pueden modificar presupuestos en borrador, solicitado, revisión o rechazado');
     }
 
-    const { cliente_id, fecha_emision, solicitado_por, motivo_servicio, tipo_documento, subtotal, iva, impuesto_total, total, condiciones, detalles } = data;
+    const { cliente_id, direccion_historica, fecha_emision, solicitado_por, motivo_servicio, tipo_documento, subtotal, iva, impuesto_total, total, condiciones, detalles } = data;
 
     const session = await getSession();
-    // Si estaba solicitado y no tenía vendedor, al editarlo el vendedor se lo asigna y pasa a BORRADOR
     let nuevoEstado = p.estado;
     let nuevoVendedor = p.vendedor_id;
 
@@ -192,24 +201,27 @@ export async function updatePresupuesto(id: number, data: any) {
       nuevoVendedor = session ? session.id : null;
     }
 
-    // Update header
+    const [clienteRows] = await connection.query('SELECT * FROM clientes WHERE id = ?', [cliente_id]);
+    const c = (clienteRows as any[])[0];
+
     await connection.query(
       `UPDATE presupuestos 
-       SET cliente_id = ?, fecha_emision = ?, solicitado_por = ?, motivo_servicio = ?, tipo_documento = ?, subtotal = ?, iva = ?, impuesto_total = ?, total = ?, condiciones = ?, estado = ?, vendedor_id = ?
+       SET cliente_id = ?, cliente_razon_social = ?, cliente_identificador = ?, cliente_correo = ?, cliente_telefono = ?, cliente_tipo = ?, direccion_historica = ?, fecha_emision = ?, solicitado_por = ?, motivo_servicio = ?, tipo_documento = ?, subtotal = ?, iva = ?, impuesto_total = ?, total = ?, condiciones = ?, estado = ?, vendedor_id = ?
        WHERE id = ?`,
-      [cliente_id, fecha_emision, solicitado_por, motivo_servicio, tipo_documento, subtotal, iva, impuesto_total, total, condiciones, nuevoEstado, nuevoVendedor, id]
+      [cliente_id, c?.razon_social || null, c?.identificador_fiscal || null, c?.correo || null, c?.telefono || null, c?.tipo_cliente || null, direccion_historica || null, fecha_emision, solicitado_por, motivo_servicio, tipo_documento, subtotal, iva, impuesto_total, total, condiciones, nuevoEstado, nuevoVendedor, id]
     );
 
-    // Delete old details
     await connection.query('DELETE FROM presupuestos_detalle WHERE presupuestos_id = ?', [id]);
 
-    // Insert new details
     for (const detalle of detalles) {
+      const [servicioRows] = await connection.query('SELECT * FROM servicios WHERE id = ?', [detalle.servicio_id]);
+      const s = (servicioRows as any[])[0];
+
       await connection.query(
         `INSERT INTO presupuestos_detalle 
-         (presupuestos_id, servicio_id, cantidad, precio_unitario_historico, total_linea) 
-         VALUES (?, ?, ?, ?, ?)`,
-        [id, detalle.servicio_id, detalle.cantidad, detalle.precio_unitario, detalle.total_linea]
+         (presupuestos_id, servicio_id, servicio_item, servicio_caracteristica, servicio_unidad_medida, cantidad, precio_unitario_historico, total_linea) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [id, detalle.servicio_id, s?.item || null, s?.caracteristica || null, s?.unidad_medida || null, detalle.cantidad, detalle.precio_unitario, detalle.total_linea]
       );
     }
 
@@ -225,4 +237,3 @@ export async function updatePresupuesto(id: number, data: any) {
     connection.release();
   }
 }
-

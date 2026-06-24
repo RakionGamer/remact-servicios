@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { getClientes } from '@/actions/clientes';
+import { getClientes, getClienteById } from '@/actions/clientes';
 import { getServicios } from '@/actions/servicios';
 import { createPresupuesto } from '@/actions/presupuestos';
 import { Loader2, Trash2, Calendar as CalendarIcon, Search, Building2, Save } from 'lucide-react';
@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ServiciosSelectionModal } from '@/components/presupuestos/ServiciosSelectionModal';
 import { ClienteSelectionModal } from '@/components/presupuestos/ClienteSelectionModal';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from '@/lib/utils';
@@ -30,11 +31,12 @@ export default function NuevoPresupuestoPage() {
   // Form Header State
   const [clienteSeleccionado, setClienteSeleccionado] = useState<any | null>(null);
   const [clienteId, setClienteId] = useState('');
+  const [direccionSeleccionada, setDireccionSeleccionada] = useState('');
   const [solicitadoPor, setSolicitadoPor] = useState('');
   const [fecha, setFecha] = useState<Date | undefined>();
   const [motivo, setMotivo] = useState('');
   const tipoDocumento = 'FACTURA';
-  const [condiciones, setCondiciones] = useState('Validez de la oferta: 15 días hábiles.\nForma de pago: 50% anticipo, 50% al finalizar.');
+  const [condiciones, setCondiciones] = useState('');
 
   // Form Details State
   const [detalles, setDetalles] = useState<any[]>([]);
@@ -45,9 +47,18 @@ export default function NuevoPresupuestoPage() {
     getServicios().then(res => { if (res.success) setServicios(res.data || []) });
   }, []);
 
-  const handleSelectCliente = (cliente: any) => {
+  const handleSelectCliente = async (cliente: any) => {
     setClienteSeleccionado(cliente);
     setClienteId(cliente.id.toString());
+    setDireccionSeleccionada(cliente.direccion || '');
+
+    const res = await getClienteById(cliente.id);
+    if (res.success && res.data) {
+      setClienteSeleccionado(res.data);
+      if (res.data.direcciones && res.data.direcciones.length > 0) {
+        setDireccionSeleccionada(res.data.direcciones[0]);
+      }
+    }
   };
 
   const handleUpdateServicios = (selectedServicios: any[]) => {
@@ -116,6 +127,7 @@ export default function NuevoPresupuestoPage() {
 
     const data = {
       cliente_id: parseInt(clienteId),
+      direccion_historica: direccionSeleccionada,
       solicitado_por: solicitadoPor || '',
       fecha_emision: fecha ? format(fecha, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
       motivo_servicio: motivo,
@@ -174,10 +186,14 @@ export default function NuevoPresupuestoPage() {
                   {clienteSeleccionado ? (
                     <div className="flex items-center gap-2 truncate">
                       <span className="text-zinc-900 font-semibold text-sm truncate">{clienteSeleccionado.razon_social}</span>
-                      <span className="text-zinc-400 hidden sm:inline">-</span>
-                      <span className="text-xs text-zinc-500 font-normal truncate">
-                        RUT: {clienteSeleccionado.identificador_fiscal}
-                      </span>
+                      {clienteSeleccionado.identificador_fiscal && (
+                        <>
+                          <span className="text-zinc-400 hidden sm:inline">-</span>
+                          <span className="text-xs text-zinc-500 font-normal truncate">
+                            RUT: {clienteSeleccionado.identificador_fiscal}
+                          </span>
+                        </>
+                      )}
                     </div>
                   ) : (
                     <span>Seleccionar cliente...</span>
@@ -185,6 +201,29 @@ export default function NuevoPresupuestoPage() {
                 </Button>
               }
             />
+          </div>
+
+          <div className="space-y-1.5 col-span-1 md:col-span-2 lg:col-span-1">
+            <label className="text-sm font-semibold text-zinc-800">Dirección a asociar <span className="text-red-500">*</span></label>
+            <Select 
+              value={direccionSeleccionada}
+              onValueChange={setDireccionSeleccionada}
+              disabled={!clienteSeleccionado || !clienteSeleccionado.direcciones || clienteSeleccionado.direcciones.length <= 1}
+            >
+              <SelectTrigger className="w-full bg-white h-10 shadow-sm border-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                <SelectValue placeholder={!clienteSeleccionado ? "Selecciona un cliente primero" : "Selecciona una dirección"} />
+              </SelectTrigger>
+              <SelectContent position="popper" side="bottom">
+                {clienteSeleccionado?.direcciones?.map((dir: string, i: number) => (
+                  <SelectItem key={i} value={dir}>{dir} {i === 0 ? '(Principal)' : ''}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-semibold text-zinc-800">Nombre del Solicitante</label>
+            <Input value={solicitadoPor} onChange={e => setSolicitadoPor(e.target.value)} placeholder="Ej: Juan Carlos" className="h-10 bg-white" />
           </div>
 
           <div className="space-y-1.5">
@@ -213,12 +252,7 @@ export default function NuevoPresupuestoPage() {
             </Popover>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-sm font-semibold text-zinc-800">Nombre del Solicitante</label>
-            <Input value={solicitadoPor} onChange={e => setSolicitadoPor(e.target.value)} placeholder="Ej: Juan Carlos" className="h-10 bg-white" />
-          </div>
-
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 col-span-1 md:col-span-2">
             <label className="text-sm font-semibold text-zinc-800">Motivo del Servicio u Obra</label>
             <Input value={motivo} onChange={e => setMotivo(e.target.value)} placeholder="Ej: Remodelación Oficina Central" className="h-10 bg-white" />
           </div>
@@ -324,6 +358,15 @@ export default function NuevoPresupuestoPage() {
                 onClick={() => setCondiciones(prev => prev + (prev ? '\n\n' : '') + 'Este presupuesto tiene una vigencia de 07 días continuos')}
               >
                 + Vigencia 7 días
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="text-xs bg-zinc-50 hover:bg-zinc-100 h-auto py-1.5 px-3 text-zinc-600 text-left"
+                onClick={() => setCondiciones(prev => prev + (prev ? '\n\n' : '') + 'Validez de la oferta: 15 días hábiles.\nForma de pago: 50% anticipo, 50% al finalizar.')}
+              >
+                + Condiciones estándar
               </Button>
               <Button
                 type="button"
