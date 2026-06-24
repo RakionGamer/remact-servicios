@@ -89,7 +89,6 @@ export function ClientesTable({ initialClientes }: Props) {
           <TableHeader>
             <TableRow>
               <TableHead>Razón Social</TableHead>
-              <TableHead>RUT</TableHead>
               <TableHead>Tipo</TableHead>
               <TableHead>Teléfono</TableHead>
               <TableHead className="text-right">Acciones</TableHead>
@@ -100,7 +99,6 @@ export function ClientesTable({ initialClientes }: Props) {
               filteredClientes.map((cliente) => (
                 <TableRow key={cliente.id}>
                   <TableCell>{cliente.razon_social}</TableCell>
-                  <TableCell>{cliente.identificador_fiscal}</TableCell>
                   <TableCell>
                     {cliente.tipo_cliente === 'JURIDICA' ? 'Empresa' :
                       cliente.tipo_cliente === 'NATURAL' ? 'Natural' :
