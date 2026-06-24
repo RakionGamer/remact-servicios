@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { deleteCliente, reactivarCliente, deleteClientePermanente } from '@/actions/clientes';
+import { deleteCliente } from '@/actions/clientes';
 import { toast } from 'sonner';
 import {
   Dialog, DialogContent, DialogDescription,
