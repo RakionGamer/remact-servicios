@@ -24,35 +24,74 @@ export function ServicioEditModal({ servicio, onOptimisticUpdate, onRevert, onSu
   // Inputs controlados — evitan el flicker cuando el Server Component re-renderiza con nuevos props
   const [itemValue, setItemValue] = useState(servicio.item || '');
   const [caracteristicaValue, setCaracteristicaValue] = useState<'Empresa' | 'Particular' | ''>(servicio.caracteristica || '');
-  const [zonaValue, setZonaValue] = useState(servicio.zona || '');
+  const [zonaValue, setZonaValue] = useState<'Oeste' | 'Este' | ''>((servicio.zona as any) || '');
   const [unidadValue, setUnidadValue] = useState(servicio.unidad_medida || '');
   const [valorValue, setValorValue] = useState(servicio.valor_unitario ? new Intl.NumberFormat('es-CL').format(servicio.valor_unitario) : '');
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const zonaRef = useRef<HTMLDivElement>(null);
   const [sliderStyle, setSliderStyle] = useState({ left: 0, width: 0, opacity: 0 });
+  const [zonaSliderStyle, setZonaSliderStyle] = useState({ left: 0, width: 0, opacity: 0 });
 
   useEffect(() => {
+    if (!open) return;
+    
     if (!caracteristicaValue) {
-      setSliderStyle(prev => ({ ...prev, opacity: 0 }));
+      setSliderStyle(prev => prev.opacity === 0 ? prev : { ...prev, opacity: 0 });
       return;
     }
-    const container = containerRef.current;
-    if (!container) return;
-    const btn = container.querySelector(`button[data-value="${caracteristicaValue}"]`) as HTMLButtonElement;
-    if (btn) {
-      setSliderStyle({
-        left: btn.offsetLeft,
-        width: btn.offsetWidth,
-        opacity: 1
-      });
+    const updateSlider = () => {
+      const container = containerRef.current;
+      if (!container) return;
+      const btn = container.querySelector(`button[data-value="${caracteristicaValue}"]`) as HTMLButtonElement;
+      if (btn && btn.offsetWidth > 0) {
+        setSliderStyle(prev => {
+          if (prev.left === btn.offsetLeft && prev.width === btn.offsetWidth && prev.opacity === 1) return prev;
+          return {
+            left: btn.offsetLeft,
+            width: btn.offsetWidth,
+            opacity: 1
+          };
+        });
+      }
+    };
+    updateSlider();
+    const timeout = setTimeout(updateSlider, 100);
+    return () => clearTimeout(timeout);
+  }, [caracteristicaValue, open]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    if (!zonaValue) {
+      setZonaSliderStyle(prev => prev.opacity === 0 ? prev : { ...prev, opacity: 0 });
+      return;
     }
-  }, [caracteristicaValue]);
+    const updateSlider = () => {
+      const container = zonaRef.current;
+      if (!container) return;
+      const btn = container.querySelector(`button[data-value="${zonaValue}"]`) as HTMLButtonElement;
+      if (btn && btn.offsetWidth > 0) {
+        setZonaSliderStyle(prev => {
+          if (prev.left === btn.offsetLeft && prev.width === btn.offsetWidth && prev.opacity === 1) return prev;
+          return {
+            left: btn.offsetLeft,
+            width: btn.offsetWidth,
+            opacity: 1
+          };
+        });
+      }
+    };
+    updateSlider();
+    const timeout = setTimeout(updateSlider, 100);
+    return () => clearTimeout(timeout);
+  }, [zonaValue, open]);
 
   const handleOpen = () => {
     // Sincronizar estado local con los props al abrir
     setItemValue(servicio.item || '');
     setCaracteristicaValue(servicio.caracteristica || '');
-    setZonaValue(servicio.zona || '');
+    setZonaValue((servicio.zona as any) || '');
     setUnidadValue(servicio.unidad_medida || '');
     setValorValue(servicio.valor_unitario ? new Intl.NumberFormat('es-CL').format(servicio.valor_unitario) : '');
     setError('');
@@ -177,15 +216,46 @@ export function ServicioEditModal({ servicio, onOptimisticUpdate, onRevert, onSu
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Zona</label>
-              <Input
-                name="zona"
-                value={zonaValue}
-                onChange={(e) => setZonaValue(e.target.value)}
-                className="h-10"
-              />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col justify-end space-y-2 pb-1">
+              <div className="flex items-center justify-between w-full h-[40px]">
+                <label className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Zona <span className="text-muted-foreground font-normal text-xs">(Opcional)</span></label>
+                <div ref={zonaRef} className="relative inline-flex p-1 bg-zinc-100/80 dark:bg-zinc-800/80 rounded-lg">
+                  <div
+                    className="absolute top-1 bottom-1 bg-zinc-900 dark:bg-white rounded-md shadow-sm transition-all duration-300 ease-out"
+                    style={{
+                      left: `${zonaSliderStyle.left}px`,
+                      width: `${zonaSliderStyle.width}px`,
+                      opacity: zonaSliderStyle.opacity,
+                      transform: zonaSliderStyle.opacity ? 'scale(1)' : 'scale(0.95)'
+                    }}
+                  />
+                  <button
+                    type="button"
+                    data-value="Oeste"
+                    onClick={() => setZonaValue(zonaValue === 'Oeste' ? '' : 'Oeste')}
+                    className={`relative px-4 h-8 flex items-center justify-center text-sm font-medium rounded-md transition-colors duration-200 ${
+                      zonaValue === 'Oeste'
+                        ? 'text-white dark:text-zinc-900'
+                        : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
+                    }`}
+                  >
+                    Oeste
+                  </button>
+                  <button
+                    type="button"
+                    data-value="Este"
+                    onClick={() => setZonaValue(zonaValue === 'Este' ? '' : 'Este')}
+                    className={`relative px-4 h-8 flex items-center justify-center text-sm font-medium rounded-md transition-colors duration-200 ${
+                      zonaValue === 'Este'
+                        ? 'text-white dark:text-zinc-900'
+                        : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
+                    }`}
+                  >
+                    Este
+                  </button>
+                </div>
+              </div>
             </div>
 
             <div className="space-y-1.5">

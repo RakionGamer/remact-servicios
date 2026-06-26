@@ -11,9 +11,10 @@ interface ServiciosSelectionModalProps {
   servicios: any[];
   initialSelectedIds: string[];
   onAddServicios: (selectedServicios: any[]) => void;
+  hidePrices?: boolean;
 }
 
-export function ServiciosSelectionModal({ servicios, initialSelectedIds, onAddServicios }: ServiciosSelectionModalProps) {
+export function ServiciosSelectionModal({ servicios, initialSelectedIds, onAddServicios, hidePrices = false }: ServiciosSelectionModalProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [filterCaracteristica, setFilterCaracteristica] = useState<'Todas' | 'Empresa' | 'Particular'>('Todas');
@@ -222,10 +223,12 @@ export function ServiciosSelectionModal({ servicios, initialSelectedIds, onAddSe
                           )}
                         </div>
                       </div>
-                      <div className="text-right whitespace-nowrap">
-                        <p className="font-bold text-sm text-emerald-700">{formatMoney(parseFloat(s.valor_unitario || 0))}</p>
-                        <p className="text-[10px] text-zinc-500 font-medium">por {s.unidad_medida || 'UNID.'}</p>
-                      </div>
+                      {!hidePrices && (
+                        <div className="text-right whitespace-nowrap">
+                          <p className="font-bold text-sm text-emerald-700">{formatMoney(parseFloat(s.valor_unitario || 0))}</p>
+                          <p className="text-[10px] text-zinc-500 font-medium">por {s.unidad_medida || 'UNID.'}</p>
+                        </div>
+                      )}
                     </div>
                   </label>
                 );
@@ -237,8 +240,9 @@ export function ServiciosSelectionModal({ servicios, initialSelectedIds, onAddSe
         {/* 3. FOOTER: Añadido 'shrink-0' */}
         <div className="p-4 bg-white border-t flex flex-col sm:flex-row justify-between items-center gap-4 shrink-0">
           <div className="flex flex-col">
-
-            <span className="text-lg font-bold text-zinc-900">Monto acumulado: <span className="text-emerald-700">{formatMoney(totalMonto)}</span></span>
+            {!hidePrices && (
+              <span className="text-lg font-bold text-zinc-900">Monto acumulado: <span className="text-emerald-700">{formatMoney(totalMonto)}</span></span>
+            )}
           </div>
 
           <div className="flex gap-2 w-full sm:w-auto">

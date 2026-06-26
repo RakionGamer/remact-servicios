@@ -139,7 +139,13 @@ export function ServiciosTable({
                   <TableCell className="font-medium">{servicio.item}</TableCell>
                   <TableCell>
                     {servicio.caracteristica ? (
-                      <span className="px-2 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                      <span className={`px-2 py-1 rounded-md text-xs font-medium ${
+                        servicio.caracteristica === 'Empresa'
+                          ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900'
+                          : servicio.caracteristica === 'Particular'
+                          ? 'bg-red-600 text-white dark:bg-red-500'
+                          : 'bg-blue-50 text-blue-700 border border-blue-200'
+                      }`}>
                         {servicio.caracteristica}
                       </span>
                     ) : '-'}

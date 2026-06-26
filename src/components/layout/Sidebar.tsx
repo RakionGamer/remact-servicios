@@ -11,7 +11,7 @@ import {
   SidebarFooter,
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
-import { Home, Users, Briefcase, FileText, Shield, Settings } from 'lucide-react';
+import { Home, Users, Briefcase, FileText, Shield, Settings, Calculator } from 'lucide-react';
 import { getSession } from '@/actions/auth';
 import { LogoutButton } from './LogoutButton';
 
@@ -20,7 +20,8 @@ const items = [
   { title: 'Usuarios', url: '/dashboard/usuarios', icon: Shield },
   { title: 'Clientes', url: '/dashboard/clientes', icon: Users },
   { title: 'Servicios', url: '/dashboard/servicios', icon: Briefcase },
-  { title: 'Presupuestos', url: '/dashboard/presupuestos', icon: FileText },
+  { title: 'Presupuestos', url: '/dashboard/presupuestos', icon: Calculator },
+  { title: 'Informes', url: '/dashboard/informes', icon: FileText },
   { title: 'Configuración', url: '/dashboard/configuracion', icon: Settings },
 ];
 
@@ -30,7 +31,7 @@ export async function AppSidebar() {
 
   const filteredItems = items.filter(item => {
     if (isAdmin) return true;
-    return ['Inicio', 'Clientes', 'Presupuestos', 'Configuración'].includes(item.title);
+    return ['Inicio', 'Clientes', 'Presupuestos', 'Informes', 'Configuración'].includes(item.title);
   });
 
   return (
