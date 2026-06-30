@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { updatePresupuestoEstado } from '@/actions/presupuestos';
-import { Loader2, CheckCircle2, XCircle, Send, Edit, Clock } from 'lucide-react';
+import { updatePresupuestoEstado, duplicatePresupuesto } from '@/actions/presupuestos';
+import { Loader2, CheckCircle2, XCircle, Send, Edit, Clock, Copy } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { io as ClientIO } from 'socket.io-client';
 import { toast } from 'sonner';
@@ -24,6 +24,7 @@ interface Props {
 
 export function PresupuestoActions({ presupuestoId, estado, userRole }: Props) {
   const [loading, setLoading] = useState(false);
+  const [isDuplicating, setIsDuplicating] = useState(false);
   const [confirmAction, setConfirmAction] = useState<string | null>(null);
   const router = useRouter();
 
@@ -60,8 +61,37 @@ export function PresupuestoActions({ presupuestoId, estado, userRole }: Props) {
     setConfirmAction(null);
   };
 
+  const handleDuplicate = async () => {
+    setIsDuplicating(true);
+    const result = await duplicatePresupuesto(presupuestoId);
+    if (!result.success) {
+      toast.error(result.error || 'Ocurrió un error al duplicar el presupuesto.');
+    } else {
+      toast.success('Presupuesto duplicado correctamente.');
+      const socket = ClientIO(process.env.NEXT_PUBLIC_SITE_URL || undefined, {
+        path: '/api/socket/io',
+        addTrailingSlash: false,
+        transports: ['websocket'],
+      });
+      socket.on('connect', () => {
+        socket.emit('presupuesto-updated', { roomId: 'presupuestos-list', action: 'list_updated' });
+        setTimeout(() => socket.disconnect(), 100);
+      });
+
+      window.open(`/dashboard/presupuestos/${result.insertId}`, '_blank');
+    }
+    setIsDuplicating(false);
+  };
+
   return (
     <div className="flex flex-col sm:flex-row gap-4 w-full flex-wrap">
+
+      {(userRole === 'VENDEDOR' || userRole === 'ADMIN') && (
+        <Button variant="outline" onClick={handleDuplicate} disabled={isDuplicating || loading} className="h-10 font-medium border-zinc-300 flex-1">
+          {isDuplicating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Copy className="w-4 h-4 mr-2" />}
+          Duplicar
+        </Button>
+      )}
 
       {/* Mantenemos retrocompatibilidad para estados antiguos si existen */}
       {(estado === 'SOLICITADO') && (userRole === 'VENDEDOR' || userRole === 'ADMIN') && (
