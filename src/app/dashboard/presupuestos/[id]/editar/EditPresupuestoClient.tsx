@@ -193,7 +193,7 @@ export default function EditPresupuestoClient({ initialData, userRole }: { initi
     }
   };
 
-  const formatMoney = (val: number) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(val);
+  const formatMoney = (val: number) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(val);
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-12">
@@ -374,7 +374,7 @@ export default function EditPresupuestoClient({ initialData, userRole }: { initi
                       <TableCell className="text-right">
                         <Input
                           type="text"
-                          value={new Intl.NumberFormat('es-CL').format(Number(d.precio_unitario))}
+                          value={new Intl.NumberFormat('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(Number(d.precio_unitario))}
                           disabled
                           className="h-9 w-[120px] ml-auto text-right disabled:opacity-70 disabled:bg-zinc-100 disabled:text-zinc-500 disabled:cursor-not-allowed shadow-sm font-medium"
                         />

@@ -246,13 +246,9 @@ export function InformePDF({ informe: i, configs, logoUrl, imagenesLayout }: Pro
           
           <View style={styles.headerBottomRow}>
             <View style={styles.transferContainer}>
-              <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8, color: themeColor, marginBottom: 4 }}>DATOS DE TRANSFERENCIA</Text>
-              {configs['DATOS_PAGO']
-                ? configs['DATOS_PAGO'].split('\n').filter((line: string) => line.trim() !== '' && !line.toUpperCase().includes('CORREO')).map((line: string, idx: number) => (
-                  <Text key={idx} style={{ fontSize: 8, marginBottom: 2 }}>{line}</Text>
-                ))
-                : <Text style={{ fontSize: 8 }}>-</Text>
-              }
+              <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8, color: themeColor, marginBottom: 4 }}>DIRECCIÓN DE OBRA</Text>
+              <Text style={{ fontSize: 8, textTransform: 'uppercase', marginBottom: 2 }}>{i.direccion_obra || 'N/A'}</Text>
+              <Text style={{ fontSize: 8, textTransform: 'uppercase' }}>{i.comuna || 'N/A'}</Text>
             </View>
             <View style={[styles.logoContainer, { alignItems: 'center' }]}>
               {logoUrl && <Image src={logoUrl} style={styles.logo} />}
@@ -284,14 +280,7 @@ export function InformePDF({ informe: i, configs, logoUrl, imagenesLayout }: Pro
               <Text style={styles.infoLabel}>SOLICITADO POR</Text>
               <Text style={styles.infoValue}>{i.solicitado_por || 'N/A'}</Text>
             </View>
-            <View style={styles.infoCol}>
-              <Text style={styles.infoLabel}>DIRECCIÓN DE OBRA</Text>
-              <Text style={styles.infoValue}>{i.direccion_obra || 'N/A'}</Text>
-            </View>
-            <View style={styles.infoCol}>
-              <Text style={styles.infoLabel}>COMUNA</Text>
-              <Text style={styles.infoValue}>{i.comuna || 'N/A'}</Text>
-            </View>
+
             <View style={styles.infoCol}>
               <Text style={styles.infoLabel}>INICIO DE TRABAJOS</Text>
               <Text style={styles.infoValue}>{formatDate(i.fecha_inicio)}</Text>

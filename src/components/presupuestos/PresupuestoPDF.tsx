@@ -2,7 +2,7 @@ import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Image, Font } from '@react-pdf/renderer';
 
 // Formateador de dinero
-const formatMoney = (val: number) => new Intl.NumberFormat('es-CL', { style: 'decimal', minimumFractionDigits: 0 }).format(val);
+const formatMoney = (val: number) => new Intl.NumberFormat('es-CL', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(val);
 
 const styles = StyleSheet.create({
   page: {

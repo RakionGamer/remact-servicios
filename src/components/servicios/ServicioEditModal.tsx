@@ -26,7 +26,7 @@ export function ServicioEditModal({ servicio, onOptimisticUpdate, onRevert, onSu
   const [caracteristicaValue, setCaracteristicaValue] = useState<'Empresa' | 'Particular' | ''>(servicio.caracteristica || '');
   const [zonaValue, setZonaValue] = useState<'Oeste' | 'Este' | ''>((servicio.zona as any) || '');
   const [unidadValue, setUnidadValue] = useState(servicio.unidad_medida || '');
-  const [valorValue, setValorValue] = useState(servicio.valor_unitario ? new Intl.NumberFormat('es-CL').format(servicio.valor_unitario) : '');
+  const [valorValue, setValorValue] = useState(servicio.valor_unitario ? new Intl.NumberFormat('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(servicio.valor_unitario) : '');
 
   const containerRef = useRef<HTMLDivElement>(null);
   const zonaRef = useRef<HTMLDivElement>(null);
@@ -93,17 +93,43 @@ export function ServicioEditModal({ servicio, onOptimisticUpdate, onRevert, onSu
     setCaracteristicaValue(servicio.caracteristica || '');
     setZonaValue((servicio.zona as any) || '');
     setUnidadValue(servicio.unidad_medida || '');
-    setValorValue(servicio.valor_unitario ? new Intl.NumberFormat('es-CL').format(servicio.valor_unitario) : '');
+    setValorValue(servicio.valor_unitario ? new Intl.NumberFormat('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(servicio.valor_unitario) : '');
     setError('');
     setOpen(true);
   };
 
   const handleValorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const rawValue = e.target.value.replace(/\D/g, '');
+    let rawValue = e.target.value.replace(/[^0-9,]/g, '');
+    
+    const parts = rawValue.split(',');
+    if (parts.length > 2) {
+      rawValue = parts[0] + ',' + parts.slice(1).join('');
+    }
+
     if (!rawValue) {
       setValorValue('');
       return;
     }
+
+    if (rawValue.endsWith(',')) {
+      const integerPart = rawValue.slice(0, -1);
+      if (integerPart) {
+        const formatted = new Intl.NumberFormat('es-CL').format(parseInt(integerPart, 10));
+        setValorValue(`${formatted},`);
+      } else {
+        setValorValue('0,');
+      }
+      return;
+    }
+
+    if (rawValue.includes(',')) {
+      const [intPart, decPart] = rawValue.split(',');
+      const formattedInt = new Intl.NumberFormat('es-CL').format(parseInt(intPart || '0', 10));
+      const limitedDec = decPart.slice(0, 2);
+      setValorValue(`${formattedInt},${limitedDec}`);
+      return;
+    }
+
     const formatted = new Intl.NumberFormat('es-CL').format(parseInt(rawValue, 10));
     setValorValue(formatted);
   };
@@ -113,14 +139,14 @@ export function ServicioEditModal({ servicio, onOptimisticUpdate, onRevert, onSu
     setLoading(true);
     setError('');
 
-    const numericValor = valorValue.replace(/\./g, '');
+    const cleanStr = valorValue.replace(/\./g, '').replace(',', '.');
 
     const newData = {
       item: itemValue,
       caracteristica: caracteristicaValue || null,
       zona: zonaValue,
       unidad_medida: unidadValue,
-      valor_unitario: parseInt(numericValor, 10),
+      valor_unitario: parseFloat(cleanStr),
     };
 
     // 1. Actualizar la tabla instantáneamente (optimistic)

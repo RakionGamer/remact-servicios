@@ -33,7 +33,7 @@ export default async function DashboardInicio() {
 
   // Formateador de moneda para CLP
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(value);
+    return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(value);
   };
 
   return (

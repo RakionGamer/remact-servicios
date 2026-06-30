@@ -56,11 +56,37 @@ export function ServicioFormModal() {
   }, [zona]);
 
   const handleValorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const rawValue = e.target.value.replace(/\D/g, '');
+    let rawValue = e.target.value.replace(/[^0-9,]/g, '');
+    
+    const parts = rawValue.split(',');
+    if (parts.length > 2) {
+      rawValue = parts[0] + ',' + parts.slice(1).join('');
+    }
+
     if (!rawValue) {
       setValorUnitario('');
       return;
     }
+
+    if (rawValue.endsWith(',')) {
+      const integerPart = rawValue.slice(0, -1);
+      if (integerPart) {
+        const formatted = new Intl.NumberFormat('es-CL').format(parseInt(integerPart, 10));
+        setValorUnitario(`${formatted},`);
+      } else {
+        setValorUnitario('0,');
+      }
+      return;
+    }
+
+    if (rawValue.includes(',')) {
+      const [intPart, decPart] = rawValue.split(',');
+      const formattedInt = new Intl.NumberFormat('es-CL').format(parseInt(intPart || '0', 10));
+      const limitedDec = decPart.slice(0, 2);
+      setValorUnitario(`${formattedInt},${limitedDec}`);
+      return;
+    }
+
     const formatted = new Intl.NumberFormat('es-CL').format(parseInt(rawValue, 10));
     setValorUnitario(formatted);
   };
@@ -70,14 +96,14 @@ export function ServicioFormModal() {
     setError('');
 
     const rawValor = formData.get('valor_unitario') as string;
-    const numericValor = rawValor.replace(/\./g, '');
+    const cleanStr = rawValor.replace(/\./g, '').replace(',', '.');
 
     const data = {
       item: formData.get('item'),
       caracteristica: formData.get('caracteristica') || null,
       zona: formData.get('zona') || null,
       unidad_medida: formData.get('unidad_medida'),
-      valor_unitario: parseInt(numericValor, 10),
+      valor_unitario: parseFloat(cleanStr),
     };
 
     const result = await createServicio(data);

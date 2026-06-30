@@ -36,7 +36,7 @@ export default async function PresupuestoViewerPage({ params }: { params: Promis
   const resConfigs = await getConfiguraciones();
   const configs = resConfigs.success && resConfigs.data ? resConfigs.data : {};
 
-  const formatMoney = (val: number) => new Intl.NumberFormat('es-CL', { style: 'decimal', minimumFractionDigits: 0 }).format(val);
+  const formatMoney = (val: number) => new Intl.NumberFormat('es-CL', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(val);
 
   const emptyRowsCount = Math.max(0, 20 - (p.detalles?.length || 0));
   const emptyRows = Array.from({ length: emptyRowsCount });

@@ -56,7 +56,7 @@ export function PresupuestoDetalleDinamico({ presupuestoId, initialData, isPorta
   }, [presupuestoId, queryClient]);
 
   const p = result?.data || initialData;
-  const formatMoney = (val: number) => new Intl.NumberFormat('es-CL', { style: 'decimal', minimumFractionDigits: 0 }).format(val);
+  const formatMoney = (val: number) => new Intl.NumberFormat('es-CL', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(val);
 
   return (
     <>

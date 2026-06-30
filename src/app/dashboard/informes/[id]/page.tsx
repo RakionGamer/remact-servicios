@@ -76,9 +76,10 @@ export default async function InformeViewerPage({ params }: { params: Promise<{ 
 
               <div className="flex p-2.5 items-center">
                 <div className="flex-1 flex flex-col justify-center items-start">
-                  <div className="font-bold text-[8px] text-blue-600 mb-1 uppercase">DATOS DE TRANSFERENCIA</div>
-                  <div className="text-[8px] leading-tight whitespace-pre-line">
-                    {configs['DATOS_PAGO'] ? configs['DATOS_PAGO'].split('\n').filter((line: string) => line.trim() !== '' && !line.toUpperCase().includes('CORREO')).join('\n') : '-'}
+                  <div className="font-bold text-[8px] text-blue-600 mb-1 uppercase">DIRECCIÓN DE OBRA</div>
+                  <div className="text-[8px] leading-tight uppercase">
+                    <div>{i.direccion_obra || 'N/A'}</div>
+                    <div className="mt-0.5">{i.comuna || 'N/A'}</div>
                   </div>
                 </div>
                 <div className="flex-1 flex items-center justify-center">
@@ -107,14 +108,7 @@ export default async function InformeViewerPage({ params }: { params: Promise<{ 
                   <div className="font-bold text-[9px] text-blue-600 mb-0.5">SOLICITADO POR</div>
                   <div className="text-[9px]">{i.solicitado_por || 'N/A'}</div>
                 </div>
-                <div className="w-1/2 p-2 border-r border-b border-blue-600">
-                  <div className="font-bold text-[9px] text-blue-600 mb-0.5">DIRECCIÓN DE OBRA</div>
-                  <div className="text-[9px]">{i.direccion_obra || 'N/A'}</div>
-                </div>
-                <div className="w-1/2 p-2 border-r border-b border-blue-600">
-                  <div className="font-bold text-[9px] text-blue-600 mb-0.5">COMUNA</div>
-                  <div className="text-[9px]">{i.comuna || 'N/A'}</div>
-                </div>
+
                 <div className="w-1/2 p-2 border-r border-b border-blue-600">
                   <div className="font-bold text-[9px] text-blue-600 mb-0.5">INICIO DE TRABAJOS</div>
                   <div className="text-[9px]">{formatDate(i.fecha_inicio)}</div>

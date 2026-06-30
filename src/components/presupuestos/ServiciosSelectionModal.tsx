@@ -95,7 +95,7 @@ export function ServiciosSelectionModal({ servicios, initialSelectedIds, onAddSe
     }, 300); // Wait for Dialog to close and restore scroll before updating the background DOM
   };
 
-  const formatMoney = (val: number) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(val);
+  const formatMoney = (val: number) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(val);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>

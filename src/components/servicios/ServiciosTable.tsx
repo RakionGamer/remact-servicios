@@ -157,7 +157,7 @@ export function ServiciosTable({
                     </span>
                   </TableCell>
                   <TableCell className="text-right font-medium text-emerald-700">
-                    {new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(servicio.valor_unitario)}
+                    {new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(servicio.valor_unitario)}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end items-center gap-1">

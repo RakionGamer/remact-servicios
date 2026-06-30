@@ -230,7 +230,7 @@ export function PresupuestosTable({
                     {getStatusBadge(p.estado || 'BORRADOR')}
                   </TableCell>
                   <TableCell className="text-right font-medium text-emerald-700">
-                    {new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(p.total)}
+                    {new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(p.total)}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
