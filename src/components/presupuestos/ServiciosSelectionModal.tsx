@@ -4,8 +4,9 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Plus, Check } from 'lucide-react';
+import { Search, Plus, Check, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 interface ServiciosSelectionModalProps {
   servicios: any[];
@@ -17,8 +18,18 @@ interface ServiciosSelectionModalProps {
 export function ServiciosSelectionModal({ servicios, initialSelectedIds, onAddServicios, hidePrices = false }: ServiciosSelectionModalProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [filterCaracteristica, setFilterCaracteristica] = useState<'Todas' | 'Empresa' | 'Particular'>('Todas');
+  const [filterCaracteristica, setFilterCaracteristica] = useState<string>('Todas');
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [otrasSearch, setOtrasSearch] = useState('');
+
+  const otherCharacteristics = useMemo(() => {
+    const allChars = new Set(servicios.map(s => s.caracteristica).filter(c => c && c !== 'Empresa' && c !== 'Particular'));
+    return Array.from(allChars).sort();
+  }, [servicios]);
+
+  const filteredOtherCharacteristics = useMemo(() => {
+    return otherCharacteristics.filter(char => (char as string).toLowerCase().includes(otrasSearch.toLowerCase()));
+  }, [otherCharacteristics, otrasSearch]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [sliderStyle, setSliderStyle] = useState({ left: 0, width: 0, opacity: 0 });
@@ -170,6 +181,53 @@ export function ServiciosSelectionModal({ servicios, initialSelectedIds, onAddSe
               >
                 Particular
               </button>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    data-value={(!['Todas', 'Empresa', 'Particular'].includes(filterCaracteristica) && filterCaracteristica) ? filterCaracteristica : 'Otras'}
+                    className={`relative px-4 h-8 flex items-center justify-center text-sm font-medium rounded-md transition-colors duration-200 ${
+                      !['Todas', 'Empresa', 'Particular'].includes(filterCaracteristica)
+                        ? 'text-white dark:text-zinc-900'
+                        : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
+                    }`}
+                  >
+                    <Filter className="w-3 h-3 mr-1.5" />
+                    Otras
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-56 p-2" align="end">
+                  <div className="flex flex-col gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
+                      <Input
+                        placeholder="Buscar..."
+                        value={otrasSearch}
+                        onChange={(e) => setOtrasSearch(e.target.value)}
+                        className="h-8 pl-8 text-sm"
+                      />
+                    </div>
+                    <div className="flex flex-col max-h-[200px] overflow-y-auto pr-1">
+                      {filteredOtherCharacteristics.length === 0 ? (
+                        <span className="py-3 text-xs text-muted-foreground text-center">No se encontraron características</span>
+                      ) : (
+                        filteredOtherCharacteristics.map(char => (
+                          <button
+                            key={char as string}
+                            onClick={() => {
+                              setFilterCaracteristica(char as string);
+                              setOtrasSearch('');
+                            }}
+                            className={`flex items-center w-full px-2 py-1.5 text-sm rounded-sm text-left hover:bg-zinc-100 dark:hover:bg-zinc-800 ${filterCaracteristica === char ? 'bg-zinc-100 dark:bg-zinc-800 font-medium' : ''}`}
+                          >
+                            {char as string}
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
         </div>
@@ -214,9 +272,7 @@ export function ServiciosSelectionModal({ servicios, initialSelectedIds, onAddSe
                           {s.caracteristica && (
                             <span className={cn(
                               "inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium",
-                              s.caracteristica === 'Empresa' ? "bg-zinc-900 text-white" : 
-                              s.caracteristica === 'Particular' ? "bg-red-700 text-white" : 
-                              "bg-blue-50 text-blue-700"
+                              s.caracteristica === 'Particular' ? "bg-red-700 text-white" : "bg-zinc-900 text-white"
                             )}>
                               {s.caracteristica}
                             </span>

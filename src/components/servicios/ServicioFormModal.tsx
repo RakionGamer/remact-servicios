@@ -12,31 +12,12 @@ export function ServicioFormModal() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [caracteristica, setCaracteristica] = useState<'Empresa' | 'Particular' | ''>('');
+  const [caracteristica, setCaracteristica] = useState<string>('');
   const [zona, setZona] = useState<'Oeste' | 'Este' | ''>('');
   const [valorUnitario, setValorUnitario] = useState('');
 
-  const containerRef = useRef<HTMLDivElement>(null);
   const zonaRef = useRef<HTMLDivElement>(null);
-  const [sliderStyle, setSliderStyle] = useState({ left: 0, width: 0, opacity: 0 });
   const [zonaSliderStyle, setZonaSliderStyle] = useState({ left: 0, width: 0, opacity: 0 });
-
-  useEffect(() => {
-    if (!caracteristica) {
-      setSliderStyle(prev => ({ ...prev, opacity: 0 }));
-      return;
-    }
-    const container = containerRef.current;
-    if (!container) return;
-    const btn = container.querySelector(`button[data-value="${caracteristica}"]`) as HTMLButtonElement;
-    if (btn) {
-      setSliderStyle({
-        left: btn.offsetLeft,
-        width: btn.offsetWidth,
-        opacity: 1
-      });
-    }
-  }, [caracteristica]);
 
   useEffect(() => {
     if (!zona) {
@@ -57,7 +38,7 @@ export function ServicioFormModal() {
 
   const handleValorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let rawValue = e.target.value.replace(/[^0-9,]/g, '');
-    
+
     const parts = rawValue.split(',');
     if (parts.length > 2) {
       rawValue = parts[0] + ',' + parts.slice(1).join('');
@@ -141,41 +122,34 @@ export function ServicioFormModal() {
             <Input name="item" required placeholder="Ej: Pintura de Muro" className="h-10" />
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="space-y-1.5">
             <label className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Característica <span className="text-muted-foreground font-normal">(Opcional)</span></label>
-            <input type="hidden" name="caracteristica" value={caracteristica} />
-            <div ref={containerRef} className="relative inline-flex p-1 bg-zinc-100/80 dark:bg-zinc-800/80 rounded-lg">
-              <div
-                className="absolute top-1 bottom-1 bg-zinc-900 dark:bg-white rounded-md shadow-sm transition-all duration-300 ease-out"
-                style={{
-                  left: `${sliderStyle.left}px`,
-                  width: `${sliderStyle.width}px`,
-                  opacity: sliderStyle.opacity,
-                  transform: sliderStyle.opacity ? 'scale(1)' : 'scale(0.95)'
-                }}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className="flex p-1 bg-zinc-100/80 dark:bg-zinc-800/80 rounded-lg shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setCaracteristica(caracteristica === 'Empresa' ? '' : 'Empresa')}
+                  className={`px-4 h-8 text-sm font-medium rounded-md transition-colors ${caracteristica === 'Empresa' ? 'bg-zinc-900 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
+                    }`}
+                >
+                  Empresa
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCaracteristica(caracteristica === 'Particular' ? '' : 'Particular')}
+                  className={`px-4 h-8 text-sm font-medium rounded-md transition-colors ${caracteristica === 'Particular' ? 'bg-zinc-900 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
+                    }`}
+                >
+                  Particular
+                </button>
+              </div>
+              <Input
+                name="caracteristica"
+                value={caracteristica}
+                onChange={(e) => setCaracteristica(e.target.value)}
+                placeholder="Ej: Llaves"
+                className="h-10 flex-1"
               />
-              <button
-                type="button"
-                data-value="Empresa"
-                onClick={() => setCaracteristica(caracteristica === 'Empresa' ? '' : 'Empresa')}
-                className={`relative px-4 h-8 flex items-center justify-center text-sm font-medium rounded-md transition-colors duration-200 ${caracteristica === 'Empresa'
-                    ? 'text-white dark:text-zinc-900'
-                    : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
-                  }`}
-              >
-                Empresa
-              </button>
-              <button
-                type="button"
-                data-value="Particular"
-                onClick={() => setCaracteristica(caracteristica === 'Particular' ? '' : 'Particular')}
-                className={`relative px-4 h-8 flex items-center justify-center text-sm font-medium rounded-md transition-colors duration-200 ${caracteristica === 'Particular'
-                    ? 'text-white dark:text-zinc-900'
-                    : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
-                  }`}
-              >
-                Particular
-              </button>
             </div>
           </div>
 
@@ -199,8 +173,8 @@ export function ServicioFormModal() {
                     data-value="Oeste"
                     onClick={() => setZona(zona === 'Oeste' ? '' : 'Oeste')}
                     className={`relative px-4 h-8 flex items-center justify-center text-sm font-medium rounded-md transition-colors duration-200 ${zona === 'Oeste'
-                        ? 'text-white dark:text-zinc-900'
-                        : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
+                      ? 'text-white dark:text-zinc-900'
+                      : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
                       }`}
                   >
                     Oeste
@@ -210,8 +184,8 @@ export function ServicioFormModal() {
                     data-value="Este"
                     onClick={() => setZona(zona === 'Este' ? '' : 'Este')}
                     className={`relative px-4 h-8 flex items-center justify-center text-sm font-medium rounded-md transition-colors duration-200 ${zona === 'Este'
-                        ? 'text-white dark:text-zinc-900'
-                        : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
+                      ? 'text-white dark:text-zinc-900'
+                      : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
                       }`}
                   >
                     Este
@@ -228,34 +202,34 @@ export function ServicioFormModal() {
 
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Valor Unitario (CLP) <span className="text-red-500">*</span></label>
-          <Input
-            name="valor_unitario"
-            type="text"
-            required
-            placeholder="4.800"
-            className="h-10"
-            value={valorUnitario}
-            onChange={handleValorChange}
-          />
-        </div>
-
-        {error && (
-          <div className="p-3 bg-red-50 text-red-600 rounded-md text-sm font-medium border border-red-100">
-            {error}
+            <Input
+              name="valor_unitario"
+              type="text"
+              required
+              placeholder="4.800"
+              className="h-10"
+              value={valorUnitario}
+              onChange={handleValorChange}
+            />
           </div>
-        )}
 
-        <div className="flex justify-end gap-3 pt-2">
-          <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
-            Cancelar
-          </Button>
-          <Button type="submit" disabled={loading}>
-            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Guardar Servicio
-          </Button>
-        </div>
-      </form>
-    </DialogContent>
+          {error && (
+            <div className="p-3 bg-red-50 text-red-600 rounded-md text-sm font-medium border border-red-100">
+              {error}
+            </div>
+          )}
+
+          <div className="flex justify-end gap-3 pt-2">
+            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Guardar Servicio
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
     </Dialog >
   );
 }
