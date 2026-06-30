@@ -237,3 +237,43 @@ export async function updatePresupuesto(id: number, data: any) {
     connection.release();
   }
 }
+
+export async function duplicatePresupuesto(id: number) {
+  try {
+    const originalResult = await getPresupuestoById(id);
+    if (!originalResult.success || !originalResult.data) {
+      return { success: false, error: 'No se encontró el presupuesto original' };
+    }
+
+    const original = originalResult.data;
+
+    // Crear la data duplicada
+    const newData = {
+      cliente_id: original.cliente_id,
+      direccion_historica: original.direccion_historica,
+      fecha_emision: new Date().toISOString().split('T')[0], // Forzar fecha actual
+      solicitado_por: original.solicitado_por,
+      motivo_servicio: original.motivo_servicio,
+      tipo_documento: 'PRE-VENTA', // Forzar a pre-venta
+      subtotal: original.subtotal,
+      iva: original.iva,
+      impuesto_total: original.impuesto_total,
+      total: original.total,
+      condiciones: original.condiciones,
+      detalles: original.detalles.map((d: any) => ({
+        servicio_id: d.servicio_id,
+        cantidad: d.cantidad,
+        precio_unitario: d.precio_unitario_historico, // Mapear desde _historico hacia la prop que createPresupuesto espera
+        total_linea: d.total_linea
+      }))
+    };
+
+    // Llamamos a createPresupuesto para re-utilizar la lógica limpia de inserción
+    // createPresupuesto ya fuerza el estado inicial a "BORRADOR"
+    const createResult = await createPresupuesto(newData);
+    return createResult;
+  } catch (error: any) {
+    console.error('Error duplicating presupuesto:', error);
+    return { success: false, error: error.message };
+  }
+}

@@ -221,6 +221,16 @@ export function ServiciosSelectionModal({ servicios, initialSelectedIds, onAddSe
                               {s.caracteristica}
                             </span>
                           )}
+                          {s.zona && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium shadow-sm border bg-zinc-900 text-white border-zinc-800">
+                              {s.zona}
+                            </span>
+                          )}
+                          {s.unidad_medida && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-zinc-100 text-zinc-700 border border-zinc-200">
+                              {s.unidad_medida}
+                            </span>
+                          )}
                         </div>
                       </div>
                       {!hidePrices && (
