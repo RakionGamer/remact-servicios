@@ -16,7 +16,7 @@ export function LogoutButton({ className, variant = "outline", children }: Logou
 
   const handleLogout = async () => {
     await logoutAction();
-    router.push('/login');
+    router.push('/');
     router.refresh();
   };
 

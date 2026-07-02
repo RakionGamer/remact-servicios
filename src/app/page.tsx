@@ -1,65 +1,121 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { loginAction } from '@/actions/auth';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Loader2, BriefcaseBusiness } from 'lucide-react';
+import { toast } from 'sonner';
+
+export default function LoginPage() {
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+
+    const formData = new FormData(e.currentTarget);
+    const result = await loginAction(formData);
+
+    if (result.success) {
+      router.push('/dashboard');
+    } else {
+      toast.error(result.error || 'Ocurrió un error');
+      setLoading(false);
+    }
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
+    <div className="flex items-center justify-center min-h-screen bg-zinc-50 dark:bg-zinc-950">
+      {/* Panel Derecho - Formulario de Login */}
+      <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-zinc-50 dark:bg-zinc-950 min-h-screen lg:min-h-0 relative">
+        {/* Decoración sutil de fondo */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-zinc-200/50 via-zinc-50 to-zinc-50 dark:from-zinc-900 dark:via-zinc-950 dark:to-zinc-950 -z-10"></div>
+
+        <div className="w-full max-w-[420px] space-y-8 relative z-10">
+          <div className="flex flex-col space-y-2 text-center lg:text-left">
+            <div className="lg:hidden flex items-center justify-center mb-6">
+              <div className="p-3 bg-zinc-900 rounded-xl">
+                <BriefcaseBusiness className="h-6 w-6 text-white" />
+              </div>
+            </div>
+            <h1 className="text-3xl text-center font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+              Bienvenido de nuevo
+            </h1>
+            <p className="text-sm text-center text-muted-foreground">
+              Ingresa tus credenciales administrativas para acceder al sistema.
+            </p>
+          </div>
+
+          <div className="bg-white dark:bg-zinc-900 p-8 sm:p-10 rounded-2xl shadow-xl shadow-zinc-200/50 dark:shadow-none border border-zinc-100 dark:border-zinc-800 transition-all">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <label htmlFor="email" className="text-sm font-semibold text-zinc-900 dark:text-zinc-200 leading-none">
+                    Correo electrónico
+                  </label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    placeholder="admin@remact.cl"
+                    className="h-11 bg-zinc-50/50 dark:bg-zinc-950/50 transition-colors focus-visible:bg-white dark:focus-visible:bg-zinc-900"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label htmlFor="password" className="text-sm font-semibold text-zinc-900 dark:text-zinc-200 leading-none">
+                      Contraseña
+                    </label>
+                    <a href="#" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors">
+                      ¿Olvidaste tu clave?
+                    </a>
+                  </div>
+                  <Input
+                    id="password"
+                    name="password"
+                    type="password"
+                    autoComplete="current-password"
+                    required
+                    placeholder="••••••••"
+                    className="h-11 bg-zinc-50/50 dark:bg-zinc-950/50 transition-colors focus-visible:bg-white dark:focus-visible:bg-zinc-900"
+                  />
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full h-11 text-base font-medium shadow-md transition-all hover:scale-[1.02] active:scale-[0.98]"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Cargando...
+                  </>
+                ) : (
+                  'Ingresar al Panel'
+                )}
+              </Button>
+            </form>
+          </div>
+          {/*}
+          <p className="px-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
+            Al continuar, aceptas nuestros{" "}
+            <a href="#" className="underline underline-offset-4 hover:text-zinc-900 dark:hover:text-white transition-colors">
+              Términos de servicio
             </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+            y{" "}
+            <a href="#" className="underline underline-offset-4 hover:text-zinc-900 dark:hover:text-white transition-colors">
+              Políticas de privacidad
+            </a>.
+          </p>¨*/}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </div>
     </div>
   );
 }

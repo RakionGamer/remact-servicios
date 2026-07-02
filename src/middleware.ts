@@ -11,21 +11,21 @@ export async function middleware(request: NextRequest) {
   // 1. Proteger rutas privadas
   if (pathname.startsWith('/dashboard')) {
     if (!token) {
-      return NextResponse.redirect(new URL('/login', request.url));
+      return NextResponse.redirect(new URL('/', request.url));
     }
 
     try {
       await jwtVerify(token, JWT_SECRET);
     } catch (err) {
       // Token expirado o inválido -> Forzar login
-      const response = NextResponse.redirect(new URL('/login', request.url));
+      const response = NextResponse.redirect(new URL('/', request.url));
       response.cookies.delete('auth_session');
       return response;
     }
   }
 
   // 2. Prevenir que usuarios logueados vean la página de login
-  if (pathname.startsWith('/login') && token) {
+  if (pathname === '/' && token) {
     try {
       await jwtVerify(token, JWT_SECRET);
       return NextResponse.redirect(new URL('/dashboard', request.url));
@@ -38,5 +38,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/login'],
+  matcher: ['/dashboard/:path*', '/'],
 };
