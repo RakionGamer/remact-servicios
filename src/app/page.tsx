@@ -29,26 +29,27 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-zinc-50 dark:bg-zinc-950">
-      {/* Panel Derecho - Formulario de Login */}
-      <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-zinc-50 dark:bg-zinc-950 min-h-screen lg:min-h-0 relative">
+    <div className="flex items-center justify-center min-h-screen bg-zinc-50 dark:bg-zinc-950 relative">
+
+      {/* Logo Esquina Izquierda */}
+      <div className="absolute top-4 left-4 lg:top-4 lg:left-6 z-20">
+        <Image
+          src="/remact-logo.webp"
+          alt="Remact Logo"
+          width={120}
+          height={40}
+          className="object-contain"
+          priority
+        />
+      </div>
+
+      <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 w-full min-h-screen lg:min-h-0 relative">
         {/* Decoración sutil de fondo */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-zinc-200/50 via-zinc-50 to-zinc-50 dark:from-zinc-900 dark:via-zinc-950 dark:to-zinc-950 -z-10"></div>
 
-        <div className="w-full max-w-[420px] space-y-8 relative z-10">
+        <div className="w-full max-w-[420px] space-y-8 relative z-10 mt-12 lg:mt-0">
+
           <div className="flex flex-col space-y-2 text-center lg:text-left">
-            <div className="flex items-center justify-center mb-6">
-              <div className="p-4 bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800">
-                <Image 
-                  src="/remact-logo.webp" 
-                  alt="Remact Logo" 
-                  width={140} 
-                  height={48}
-                  className="object-contain"
-                  priority
-                />
-              </div>
-            </div>
             <h1 className="text-3xl text-center font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
               Bienvenido de nuevo
             </h1>

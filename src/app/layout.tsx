@@ -15,6 +15,9 @@ import { Toaster } from "@/components/ui/sonner";
 export const metadata: Metadata = {
   title: 'Remact Servicios',
   description: 'Sistema de gestión de servicios y presupuestos',
+  icons: {
+    icon: '/remact-logo.webp',
+  },
 };
 
 export default function RootLayout({
