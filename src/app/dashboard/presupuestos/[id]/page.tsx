@@ -98,7 +98,7 @@ export default async function PresupuestoViewerPage({ params }: { params: Promis
                   {configs['DATOS_FACTURACION']}
                 </div>
                 <div className="flex-[0.8] flex justify-center items-center">
-                  <img src="/remact-logo.png" alt="Remact Logo" className="w-28 object-contain" />
+                  <img src="/remact-logo.webp" alt="Remact Logo" className="w-28 object-contain" />
                 </div>
                 <div className="flex-1 flex flex-col items-end gap-1">
                   <table className="w-40 border-collapse text-center text-[10px] border-[1.5px]" style={{ borderColor: 'var(--theme-color)' }}>

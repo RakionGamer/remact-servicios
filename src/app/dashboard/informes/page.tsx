@@ -19,7 +19,7 @@ export default async function InformesPage() {
   const configs = configRes.success && configRes.data ? configRes.data : {};
 
   // For the PDF we might need the logo URL, usually served from public folder
-  const logoUrl = '/remact-logo.png'; // It will be converted to absolute URL inside the PDF if needed, but react-pdf usually handles relative or we'll pass base URL
+  const logoUrl = '/remact-logo.webp'; // It will be converted to absolute URL inside the PDF if needed, but react-pdf usually handles relative or we'll pass base URL
 
   return (
     <div className="space-y-6">

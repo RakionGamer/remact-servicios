@@ -37,7 +37,7 @@ export async function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="h-28 flex items-center justify-center border-b p-2">
-        <img src="/remact-logo.png" alt="Remact Logo" className="h-full object-contain" />
+        <img src="/remact-logo.webp" alt="Remact Logo" className="h-full object-contain" />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>

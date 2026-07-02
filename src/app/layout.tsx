@@ -4,6 +4,7 @@ import './globals.css';
 import QueryProvider from '@/components/providers/QueryProvider';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { cn } from "@/lib/utils";
+import PwaRegister from '@/components/PwaRegister';
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -24,6 +25,7 @@ export default function RootLayout({
   return (
     <html lang="es" className={cn("font-sans", geist.variable)}>
       <body className={inter.className}>
+        <PwaRegister />
         <QueryProvider>
           <TooltipProvider>
             {children}

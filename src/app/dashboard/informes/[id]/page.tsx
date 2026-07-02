@@ -25,7 +25,7 @@ export default async function InformeViewerPage({ params }: { params: Promise<{ 
 
   const resConfigs = await getConfiguraciones();
   const configs = resConfigs.success && resConfigs.data ? resConfigs.data : {};
-  const logoUrl = '/remact-logo.png';
+  const logoUrl = '/remact-logo.webp';
 
   const formatDate = (dateValue: any) => {
     if (!dateValue) return '';

@@ -6,6 +6,7 @@ import { loginAction } from '@/actions/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, BriefcaseBusiness } from 'lucide-react';
+import Image from 'next/image';
 import { toast } from 'sonner';
 
 export default function LoginPage() {
@@ -36,9 +37,16 @@ export default function LoginPage() {
 
         <div className="w-full max-w-[420px] space-y-8 relative z-10">
           <div className="flex flex-col space-y-2 text-center lg:text-left">
-            <div className="lg:hidden flex items-center justify-center mb-6">
-              <div className="p-3 bg-zinc-900 rounded-xl">
-                <BriefcaseBusiness className="h-6 w-6 text-white" />
+            <div className="flex items-center justify-center mb-6">
+              <div className="p-4 bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800">
+                <Image 
+                  src="/remact-logo.webp" 
+                  alt="Remact Logo" 
+                  width={140} 
+                  height={48}
+                  className="object-contain"
+                  priority
+                />
               </div>
             </div>
             <h1 className="text-3xl text-center font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
