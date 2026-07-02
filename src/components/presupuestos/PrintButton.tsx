@@ -24,7 +24,7 @@ export function PrintButton({ presupuestoId, clienteNombre, clienteCorreo, estad
       
       if (!presupuestoObj) throw new Error('Datos del presupuesto no cargados');
 
-      const logoUrl = window.location.origin + '/remact-logo.webp';
+      const logoUrl = window.location.origin + '/remact-logo.png';
       
       const blob = await pdf(<PresupuestoPDF presupuesto={presupuestoObj} configs={configs} logoUrl={logoUrl} />).toBlob();
       
