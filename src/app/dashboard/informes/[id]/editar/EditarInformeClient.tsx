@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { updateInforme } from '@/actions/informes';
 import { getServicios } from '@/actions/servicios';
-import { uploadImage } from '@/actions/cloudinary';
+import { uploadImage } from '@/actions/r2';
 import { Loader2, Calendar as CalendarIcon, Save, Trash2, Plus, Image as ImageIcon, ArrowLeft } from 'lucide-react';
 import { ServiciosSelectionModal } from '@/components/presupuestos/ServiciosSelectionModal';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';

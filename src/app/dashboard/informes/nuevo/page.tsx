@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { getClientes, getClienteById } from '@/actions/clientes';
 import { createInforme } from '@/actions/informes';
 import { getServicios } from '@/actions/servicios';
-import { uploadImage } from '@/actions/cloudinary';
+import { uploadImage } from '@/actions/r2';
 import { Loader2, Calendar as CalendarIcon, Search, Save, Trash2, Plus, Image as ImageIcon } from 'lucide-react';
 import { ServiciosSelectionModal } from '@/components/presupuestos/ServiciosSelectionModal';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
