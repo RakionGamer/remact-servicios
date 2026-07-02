@@ -32,7 +32,7 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-screen bg-zinc-50 dark:bg-zinc-950 relative">
 
       {/* Logo Esquina Izquierda */}
-      <div className="absolute top-4 left-4 lg:top-4 lg:left-6 z-20">
+      <div className="hidden md:block absolute top-4 left-4 lg:top-4 lg:left-6 z-20">
         <Image
           src="/remact-logo.webp"
           alt="Remact Logo"
