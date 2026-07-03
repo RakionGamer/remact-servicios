@@ -256,7 +256,7 @@ export async function duplicatePresupuesto(id: number) {
       fecha_emision: new Date().toISOString().split('T')[0], // Forzar fecha actual
       solicitado_por: original.solicitado_por,
       motivo_servicio: original.motivo_servicio,
-      tipo_documento: 'PRE-VENTA', // Forzar a pre-venta
+      tipo_documento: original.tipo_documento || 'FACTURA', // Mantener el original o por defecto FACTURA
       subtotal: original.subtotal,
       descuento_porcentaje: original.descuento_porcentaje,
       descuento_valor: original.descuento_valor,
