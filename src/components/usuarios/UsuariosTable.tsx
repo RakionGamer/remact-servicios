@@ -57,8 +57,61 @@ export function UsuariosTable({ initialUsuarios }: { initialUsuarios: any[] }) {
 
   return (
     <TooltipProvider delayDuration={0}>
-      <div className="bg-white rounded-md border shadow-sm">
-      <Table>
+      <div className="space-y-4">
+        {/* Vista Móvil (Tarjetas) */}
+        <div className="md:hidden space-y-4">
+          {usuarios.length > 0 ? (
+            usuarios.map((usuario) => (
+              <div key={usuario.id} className="bg-white rounded-xl border border-zinc-200 shadow-sm p-5 space-y-4">
+                <div className="flex justify-between items-start gap-4">
+                  <div className="space-y-1">
+                    <div className="text-xs text-zinc-500 font-medium">#{usuario.id}</div>
+                    <div className="font-bold text-base text-zinc-900 leading-tight">{usuario.nombre}</div>
+                    <div className="text-sm text-zinc-500">{usuario.email}</div>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <span className={
+                      usuario.rol === 'ADMIN'
+                        ? 'inline-flex items-center rounded-md bg-zinc-900 px-2.5 py-0.5 text-xs font-semibold text-white shadow-sm dark:bg-zinc-50 dark:text-zinc-900'
+                        : 'inline-flex items-center rounded-md bg-blue-600 px-2.5 py-0.5 text-xs font-semibold text-white shadow-sm'
+                    }>
+                      {usuario.rol === 'ADMIN' ? 'Administrador' : 'Vendedor'}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="pt-4 border-t border-zinc-100 flex justify-end items-center">
+                  <div className="flex items-center gap-1 bg-zinc-50 rounded-lg p-1 border border-zinc-100">
+                    <UsuarioEditModal
+                      usuario={usuario}
+                      onOptimisticUpdate={handleOptimisticUpdate}
+                      onRevert={handleRevert}
+                      onSuccess={handleSuccess}
+                    />
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="sm" onClick={() => setDeleteId(usuario.id)} className="h-8 w-8 p-0 text-zinc-500 hover:text-red-600 hover:bg-red-100">
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Eliminar usuario</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="bg-white rounded-xl border p-8 text-center text-muted-foreground shadow-sm">
+              No hay usuarios registrados.
+            </div>
+          )}
+        </div>
+
+        {/* Vista Desktop (Tabla) */}
+        <div className="hidden md:block bg-white rounded-md border shadow-sm">
+          <Table>
         <TableHeader>
           <TableRow>
             <TableHead>ID</TableHead>
@@ -113,6 +166,7 @@ export function UsuariosTable({ initialUsuarios }: { initialUsuarios: any[] }) {
           )}
         </TableBody>
       </Table>
+      </div>
 
       <Dialog open={deleteId !== null} onOpenChange={(open) => !open && !isDeleting && setDeleteId(null)}>
         <DialogContent>
@@ -122,11 +176,11 @@ export function UsuariosTable({ initialUsuarios }: { initialUsuarios: any[] }) {
               ¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="mt-4">
-            <Button type="button" variant="outline" onClick={() => setDeleteId(null)} disabled={isDeleting}>
+          <DialogFooter className="flex flex-row justify-end gap-3 sm:gap-2 mt-4 sm:mt-0 w-full">
+            <Button type="button" variant="outline" onClick={() => setDeleteId(null)} disabled={isDeleting} className="flex-1 sm:flex-none h-11 sm:h-10">
               Cancelar
             </Button>
-            <Button type="button" variant="destructive" onClick={handleConfirmDelete} disabled={isDeleting}>
+            <Button type="button" variant="destructive" onClick={handleConfirmDelete} disabled={isDeleting} className="flex-1 sm:flex-none h-11 sm:h-10">
               {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
               Eliminar
             </Button>
