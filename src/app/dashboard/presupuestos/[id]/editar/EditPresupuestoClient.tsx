@@ -524,11 +524,11 @@ export default function EditPresupuestoClient({ initialData, userRole }: { initi
           </div>
         </div>
 
-        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-4 pt-4">
-          <Button variant="ghost" onClick={() => router.push(`/dashboard/presupuestos/${initialData.id}`)} className="w-full sm:w-auto">Cancelar</Button>
-          <Button onClick={handleSubmit} disabled={loading} size="lg" className="w-full sm:w-auto px-8 bg-blue-600 hover:bg-blue-700 text-white">
+        <div className="flex flex-row justify-end gap-3 sm:gap-4 pt-4 w-full">
+          <Button variant="outline" onClick={() => router.push(`/dashboard/presupuestos/${initialData.id}`)} className="flex-1 sm:flex-none h-11 sm:h-auto">Cancelar</Button>
+          <Button onClick={handleSubmit} disabled={loading} size="lg" className="flex-1 sm:flex-none px-4 sm:px-8 bg-blue-600 hover:bg-blue-700 text-white h-11 sm:h-auto">
             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-            Guardar Cambios
+            Guardar
           </Button>
         </div>
       </div>

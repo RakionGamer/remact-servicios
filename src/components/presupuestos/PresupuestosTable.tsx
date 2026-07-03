@@ -381,15 +381,15 @@ export function PresupuestosTable({
                 ¿Estás seguro de que deseas eliminar el presupuesto #{deleteId}? Esta acción no se puede deshacer.
               </DialogDescription>
             </DialogHeader>
-            <DialogFooter className="gap-2 sm:gap-0">
-              <Button type="button" variant="outline" onClick={() => setDeleteId(null)} disabled={isDeleting}>
-                Cancelar
-              </Button>
-              <Button type="button" variant="destructive" onClick={handleConfirmDelete} disabled={isDeleting}>
-                {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
-                Eliminar
-              </Button>
-            </DialogFooter>
+            <DialogFooter className="flex flex-row justify-end gap-3 sm:gap-2 mt-4 sm:mt-0 w-full">
+            <Button type="button" variant="outline" onClick={() => setDeleteId(null)} disabled={isDeleting} className="flex-1 sm:flex-none h-11 sm:h-10">
+              Cancelar
+            </Button>
+            <Button type="button" variant="destructive" onClick={handleConfirmDelete} disabled={isDeleting} className="flex-1 sm:flex-none h-11 sm:h-10">
+              {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+              Eliminar
+            </Button>
+          </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
