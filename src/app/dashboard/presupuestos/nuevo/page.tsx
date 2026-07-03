@@ -51,14 +51,11 @@ export default function NuevoPresupuestoPage() {
   const handleSelectCliente = async (cliente: any) => {
     setClienteSeleccionado(cliente);
     setClienteId(cliente.id.toString());
-    setDireccionSeleccionada(cliente.direccion || '');
+    setDireccionSeleccionada('');
 
     const res = await getClienteById(cliente.id);
     if (res.success && res.data) {
       setClienteSeleccionado(res.data);
-      if (res.data.direcciones && res.data.direcciones.length > 0) {
-        setDireccionSeleccionada(res.data.direcciones[0]);
-      }
     }
   };
 
@@ -211,20 +208,46 @@ export default function NuevoPresupuestoPage() {
 
           <div className="space-y-1.5 col-span-1 md:col-span-2 lg:col-span-1">
             <label className="text-sm font-semibold text-zinc-800">Dirección a asociar <span className="text-red-500">*</span></label>
-            <Select 
+            <Input 
               value={direccionSeleccionada}
-              onValueChange={setDireccionSeleccionada}
-              disabled={!clienteSeleccionado || !clienteSeleccionado.direcciones || clienteSeleccionado.direcciones.length <= 1}
-            >
-              <SelectTrigger className="w-full bg-white h-10 shadow-sm border-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed">
-                <SelectValue placeholder={!clienteSeleccionado ? "Selecciona un cliente primero" : "Selecciona una dirección"} />
-              </SelectTrigger>
-              <SelectContent position="popper" side="bottom">
-                {clienteSeleccionado?.direcciones?.map((dir: string, i: number) => (
-                  <SelectItem key={i} value={dir}>{dir} {i === 0 ? '(Principal)' : ''}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              onChange={e => setDireccionSeleccionada(e.target.value)}
+              placeholder="Escribe la dirección..."
+              className="h-10 bg-white"
+            />
+            {clienteSeleccionado?.direcciones && clienteSeleccionado.direcciones.length > 0 && (
+              <div className="text-xs text-zinc-500 flex flex-wrap items-center gap-2 mt-1">
+                <span 
+                  onClick={() => setDireccionSeleccionada(clienteSeleccionado.direcciones[0])} 
+                  className="cursor-pointer hover:text-blue-600 underline truncate max-w-[200px] sm:max-w-[300px]"
+                  title={clienteSeleccionado.direcciones[0]}
+                >
+                  {clienteSeleccionado.direcciones[0]} (Principal)
+                </span>
+                {clienteSeleccionado.direcciones.length > 1 && (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button type="button" className="inline-flex items-center justify-center rounded-full bg-zinc-900 text-white w-6 h-6 text-xs font-bold hover:bg-zinc-800 transition-colors" title="Ver más direcciones">
+                        +
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-64 p-2" align="start">
+                      <div className="space-y-1">
+                        <p className="text-xs font-semibold text-zinc-500 px-2 pb-1">Otras direcciones</p>
+                        {clienteSeleccionado.direcciones.slice(1).map((dir: string, i: number) => (
+                          <div 
+                            key={i} 
+                            onClick={() => setDireccionSeleccionada(dir)} 
+                            className="cursor-pointer text-sm p-2 hover:bg-zinc-100 rounded-md transition-colors"
+                          >
+                            {dir}
+                          </div>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="space-y-1.5">
