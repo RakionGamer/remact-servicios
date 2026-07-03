@@ -87,34 +87,33 @@ export function PresupuestoActions({ presupuestoId, estado, userRole }: Props) {
     <div className="flex flex-col sm:flex-row gap-4 w-full flex-wrap">
 
       {(userRole === 'VENDEDOR' || userRole === 'ADMIN') && (
-        <Button variant="outline" onClick={handleDuplicate} disabled={isDuplicating || loading} className="h-10 font-medium border-zinc-300 flex-1">
-          {isDuplicating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Copy className="w-4 h-4 mr-2" />}
-          Duplicar
+        <Button variant="outline" onClick={handleDuplicate} disabled={isDuplicating || loading} className="h-auto py-3 font-medium border-zinc-300 w-full sm:flex-1 whitespace-normal">
+          {isDuplicating ? <Loader2 className="w-4 h-4 mr-2 animate-spin shrink-0" /> : <Copy className="w-4 h-4 mr-2 shrink-0" />}
+          <span>Duplicar</span>
         </Button>
       )}
 
-      {/* Mantenemos retrocompatibilidad para estados antiguos si existen */}
       {(estado === 'SOLICITADO') && (userRole === 'VENDEDOR' || userRole === 'ADMIN') && (
-        <Button onClick={() => router.push(`/dashboard/presupuestos/${presupuestoId}/editar`)} className="bg-zinc-900 hover:bg-zinc-800 text-white shadow-sm h-10 font-medium flex-1">
-          <Edit className="w-4 h-4 mr-2" /> Tomar Solicitud y Cotizar
+        <Button onClick={() => router.push(`/dashboard/presupuestos/${presupuestoId}/editar`)} className="h-auto py-3 bg-zinc-900 hover:bg-zinc-800 text-white shadow-sm font-medium w-full sm:flex-1 whitespace-normal">
+          <Edit className="w-4 h-4 mr-2 shrink-0" /> <span>Tomar Solicitud y Cotizar</span>
         </Button>
       )}
 
       {(estado === 'BORRADOR' || estado === 'RECHAZADO' || estado === 'EN_REVISION') && (userRole === 'VENDEDOR' || userRole === 'ADMIN') && (
         <>
-          <Button variant="outline" onClick={() => router.push(`/dashboard/presupuestos/${presupuestoId}/editar`)} className="h-10 font-medium border-zinc-300 flex-1">
-            <Edit className="w-4 h-4 mr-2" /> Editar Pre-venta
+          <Button variant="outline" onClick={() => router.push(`/dashboard/presupuestos/${presupuestoId}/editar`)} className="h-auto py-3 font-medium border-zinc-300 w-full sm:flex-1 whitespace-normal">
+            <Edit className="w-4 h-4 mr-2 shrink-0" /> <span>Editar Pre-venta</span>
           </Button>
           {(estado === 'BORRADOR' || estado === 'RECHAZADO' || estado === 'EN_REVISION') && (
             userRole === 'ADMIN' ? (
-              <Button onClick={() => setConfirmAction('APROBADO')} disabled={loading} className="bg-zinc-900 hover:bg-zinc-800 text-white shadow-sm h-10 font-medium flex-1">
-                {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
-                Autorizar Pre-venta
+              <Button onClick={() => setConfirmAction('APROBADO')} disabled={loading} className="h-auto py-3 bg-zinc-900 hover:bg-zinc-800 text-white shadow-sm font-medium w-full sm:flex-1 whitespace-normal">
+                {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin shrink-0" /> : <CheckCircle2 className="w-4 h-4 mr-2 shrink-0" />}
+                <span>Autorizar Pre-venta</span>
               </Button>
             ) : (
-              <Button onClick={() => setConfirmAction('ESPERANDO_APROBACION')} disabled={loading} className="bg-zinc-900 hover:bg-zinc-800 text-white shadow-sm h-10 font-medium flex-1">
-                {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
-                Enviar a Administración para Autorizar
+              <Button onClick={() => setConfirmAction('ESPERANDO_APROBACION')} disabled={loading} className="h-auto py-3 bg-zinc-900 hover:bg-zinc-800 text-white shadow-sm font-medium w-full sm:flex-1 whitespace-normal">
+                {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin shrink-0" /> : <Send className="w-4 h-4 mr-2 shrink-0" />}
+                <span>Enviar a Administración para Autorizar</span>
               </Button>
             )
           )}
@@ -123,13 +122,13 @@ export function PresupuestoActions({ presupuestoId, estado, userRole }: Props) {
 
       {(estado === 'ESPERANDO_APROBACION' || estado === 'ACEPTADO_CLIENTE') && userRole === 'ADMIN' && (
         <>
-          <Button onClick={() => setConfirmAction('RECHAZADO')} disabled={loading} variant="outline" className="h-10 font-medium border-zinc-300 flex-1">
-            {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <XCircle className="w-4 h-4 mr-2" />}
-            Rechazar Pre-venta
+          <Button onClick={() => setConfirmAction('RECHAZADO')} disabled={loading} variant="outline" className="h-auto py-3 font-medium border-zinc-300 w-full sm:flex-1 whitespace-normal">
+            {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin shrink-0" /> : <XCircle className="w-4 h-4 mr-2 shrink-0" />}
+            <span>Rechazar Pre-venta</span>
           </Button>
-          <Button onClick={() => setConfirmAction('APROBADO')} disabled={loading} className="bg-zinc-900 hover:bg-zinc-800 text-white shadow-sm h-10 font-medium flex-1">
-            {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
-            Autorizar Presupuesto
+          <Button onClick={() => setConfirmAction('APROBADO')} disabled={loading} className="h-auto py-3 bg-zinc-900 hover:bg-zinc-800 text-white shadow-sm font-medium w-full sm:flex-1 whitespace-normal">
+            {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin shrink-0" /> : <CheckCircle2 className="w-4 h-4 mr-2 shrink-0" />}
+            <span>Autorizar Presupuesto</span>
           </Button>
         </>
       )}
@@ -148,11 +147,11 @@ export function PresupuestoActions({ presupuestoId, estado, userRole }: Props) {
                     : '¿Estás seguro de continuar?'}
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="sm:space-x-2 mt-2 flex-col sm:flex-row gap-3 sm:gap-0">
-            <Button type="button" variant="outline" onClick={() => setConfirmAction(null)} disabled={loading}>
+          <DialogFooter className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-2 mt-4 sm:mt-0 w-full">
+            <Button size="lg" type="button" variant="outline" onClick={() => setConfirmAction(null)} disabled={loading} className="flex-1 sm:flex-none">
               Cancelar
             </Button>
-            <Button type="button" className="bg-zinc-900 text-white" onClick={handleAction} disabled={loading}>
+            <Button size="lg" type="button" className="flex-1 sm:flex-none bg-zinc-900 text-white" onClick={handleAction} disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Confirmar
             </Button>

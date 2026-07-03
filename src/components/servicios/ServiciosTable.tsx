@@ -27,10 +27,12 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 
 export function ServiciosTable({
   initialServicios,
-  searchElement
+  searchElement,
+  headerAction
 }: {
   initialServicios: any[];
   searchElement?: React.ReactNode;
+  headerAction?: React.ReactNode;
 }) {
   const [servicios, setServicios] = useState<any[]>(initialServicios);
   const [currentPage, setCurrentPage] = useState(1);
@@ -93,32 +95,126 @@ export function ServiciosTable({
   return (
     <TooltipProvider delayDuration={0}>
       <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-1">
-        <div className="w-full sm:w-auto sm:min-w-[300px]">
-          {searchElement}
-        </div>
-
-        <div className="flex flex-wrap items-center gap-4 sm:gap-6 w-full sm:w-auto">
-          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-            <span className="hidden sm:inline">Mostrar</span>
-            <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
-              <SelectTrigger className="h-8">
-                <SelectValue placeholder={pageSize.toString()} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="5">5</SelectItem>
-                <SelectItem value="10">10</SelectItem>
-                <SelectItem value="20">20</SelectItem>
-                <SelectItem value="50">50</SelectItem>
-                <SelectItem value="all">Todos</SelectItem>
-              </SelectContent>
-            </Select>
-            <span className="hidden sm:inline">registros</span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 w-full sm:w-auto">
+            <div className="flex items-center gap-4 justify-between w-full sm:w-auto sm:justify-start">
+              <h1 className="text-2xl font-bold tracking-tight">Catálogo de Servicios</h1>
+              <div className="flex sm:hidden items-center space-x-2 text-sm text-muted-foreground">
+                <span className="hidden sm:inline">Mostrar</span>
+                <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
+                  <SelectTrigger className="h-8 w-[70px]">
+                    <SelectValue placeholder={pageSize.toString()} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="5">5</SelectItem>
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="20">20</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                    <SelectItem value="all">Todos</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span className="hidden sm:inline">registros</span>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-4 flex-wrap sm:flex-nowrap w-full sm:w-auto justify-end">
+            {headerAction}
           </div>
         </div>
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-1">
+          <div className="w-full sm:w-[300px]">
+            {searchElement}
+          </div>
+          
+          <div className="hidden sm:flex items-center gap-4 sm:gap-6 w-full sm:w-auto">
+            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+              <span className="hidden sm:inline">Mostrar</span>
+              <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
+                <SelectTrigger className="h-8">
+                  <SelectValue placeholder={pageSize.toString()} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5">5</SelectItem>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="20">20</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="all">Todos</SelectItem>
+                </SelectContent>
+              </Select>
+              <span className="hidden sm:inline">registros</span>
+            </div>
+          </div>
+        </div>
+
+      {/* Vista Móvil (Tarjetas) */}
+      <div className="md:hidden space-y-4 mt-4">
+        {currentServicios.length > 0 ? (
+          currentServicios.map((servicio: any) => (
+            <div key={servicio.id} className="bg-white rounded-xl border border-zinc-200 shadow-sm p-5 space-y-4">
+              <div className="flex justify-between items-start gap-4">
+                <div className="space-y-1">
+                  <div className="text-xs text-zinc-500 font-medium">#{servicio.id}</div>
+                  <div className="font-bold text-base text-zinc-900 leading-tight">{servicio.item}</div>
+                </div>
+                <div className="shrink-0 text-right">
+                    {servicio.caracteristica ? (
+                      <span className={`px-2 py-1 rounded-md text-xs font-medium ${
+                        servicio.caracteristica === 'Particular'
+                          ? 'bg-red-600 text-white dark:bg-red-500'
+                          : 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900'
+                      }`}>
+                        {servicio.caracteristica}
+                      </span>
+                    ) : '-'}
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <span className="text-zinc-500 text-xs block mb-0.5">Zona</span>
+                  <span className="font-medium text-zinc-800">{servicio.zona || '-'}</span>
+                </div>
+                <div>
+                  <span className="text-zinc-500 text-xs block mb-0.5">Unidad</span>
+                  <span className="px-2 py-1 rounded-md text-[10px] font-semibold bg-zinc-100 text-zinc-700 border border-zinc-200">{servicio.unidad_medida}</span>
+                </div>
+              </div>
+              
+              <div className="pt-4 border-t border-zinc-100 flex justify-between items-center">
+                <div className="font-bold text-emerald-700 text-lg">
+                  {new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(servicio.valor_unitario)}
+                </div>
+                <div className="flex items-center gap-1 bg-zinc-50 rounded-lg p-1 border border-zinc-100">
+                  <ServicioEditModal
+                    servicio={servicio}
+                    onOptimisticUpdate={handleOptimisticUpdate}
+                    onRevert={handleRevert}
+                    onSuccess={handleSuccess}
+                  />
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="sm" onClick={() => setDeleteId(servicio.id)} className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-100">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Eliminar servicio</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="bg-white rounded-xl border p-8 text-center text-muted-foreground shadow-sm">
+            No hay servicios registrados en el catálogo.
+          </div>
+        )}
       </div>
 
-      <div className="bg-white rounded-md border shadow-sm">
+      {/* Vista Desktop (Tabla) */}
+      <div className="hidden md:block bg-white rounded-md border shadow-sm">
         <Table>
           <TableHeader>
             <TableRow>
@@ -226,11 +322,11 @@ export function ServiciosTable({
               ¿Estás seguro de que deseas eliminar este servicio del catálogo? Esta acción no se puede deshacer.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="mt-4">
-            <Button type="button" variant="outline" onClick={() => setDeleteId(null)} disabled={isDeleting}>
+          <DialogFooter className="flex flex-row justify-end gap-3 sm:gap-2 mt-4 sm:mt-0 w-full">
+            <Button size="lg" type="button" variant="outline" onClick={() => setDeleteId(null)} disabled={isDeleting} className="flex-1 sm:flex-none">
               Cancelar
             </Button>
-            <Button type="button" variant="destructive" onClick={handleConfirmDelete} disabled={isDeleting}>
+            <Button size="lg" type="button" variant="destructive" onClick={handleConfirmDelete} disabled={isDeleting} className="flex-1 sm:flex-none">
               {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
               Eliminar
             </Button>

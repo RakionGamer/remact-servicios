@@ -7,8 +7,9 @@ import { Input } from '@/components/ui/input';
 import { getClientes, getClienteById } from '@/actions/clientes';
 import { getServicios } from '@/actions/servicios';
 import { createPresupuesto } from '@/actions/presupuestos';
-import { Loader2, Trash2, Calendar as CalendarIcon, Search, Building2, Save } from 'lucide-react';
+import { Loader2, Trash2, Calendar as CalendarIcon, Search, Building2, Save, ArrowLeft } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
+import Link from 'next/link';
 import { ServiciosSelectionModal } from '@/components/presupuestos/ServiciosSelectionModal';
 import { ClienteSelectionModal } from '@/components/presupuestos/ClienteSelectionModal';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -162,7 +163,14 @@ export default function NuevoPresupuestoPage() {
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-12">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Nueva Pre-venta</h1>
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="icon" asChild className="shrink-0">
+            <Link href="/dashboard/presupuestos">
+              <ArrowLeft className="w-4 h-4" />
+            </Link>
+          </Button>
+          <h1 className="text-2xl font-bold tracking-tight line-clamp-1">Nueva Pre-venta</h1>
+        </div>
       </div>
 
 
@@ -304,7 +312,7 @@ export default function NuevoPresupuestoPage() {
 
         {/* Detalles / Ítems */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h2 className="text-lg font-semibold tracking-tight">Ítems a Cotizar</h2>
             <ServiciosSelectionModal
               servicios={servicios}
@@ -314,7 +322,64 @@ export default function NuevoPresupuestoPage() {
           </div>
 
           <div className="border border-zinc-200 rounded-md bg-white shadow-sm overflow-hidden">
-            <Table>
+            {/* Vista Móvil (Tarjetas) */}
+            <div className="md:hidden divide-y divide-zinc-200">
+              {detalles.length === 0 ? (
+                <div className="p-8 text-center text-zinc-500 text-sm">
+                  Aún no has agregado servicios a este presupuesto.
+                </div>
+              ) : (
+                detalles.map((d) => (
+                  <div key={d.id} className="p-4 space-y-4 bg-white">
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="font-bold text-zinc-900 text-sm leading-tight">{d.servicio_nombre}</div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-zinc-400 hover:text-red-600 hover:bg-red-50 shrink-0"
+                        onClick={() => removeDetalle(d.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">Cantidad</label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0.01"
+                          value={d.cantidad}
+                          onChange={e => updateDetalle(d.id, 'cantidad', e.target.value)}
+                          className="h-9 w-full text-center font-medium shadow-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        />
+                      </div>
+                      
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider block text-right">Precio Unit.</label>
+                        <Input
+                          type="text"
+                          value={new Intl.NumberFormat('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(Number(d.precio_unitario))}
+                          disabled
+                          className="h-9 w-full text-right disabled:opacity-70 disabled:bg-zinc-100 disabled:text-zinc-500 shadow-sm font-medium"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="pt-3 flex justify-between items-center border-t border-zinc-100">
+                      <span className="text-sm font-semibold text-zinc-600">Subtotal Línea</span>
+                      <span className="font-bold text-emerald-700 text-lg">{formatMoney(d.total_linea)}</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Vista Desktop (Tabla) */}
+            <div className="hidden md:block">
+              <Table>
               <TableHeader className="bg-zinc-50/80">
                 <TableRow>
                   <TableHead className="w-full">Servicio / Ítem</TableHead>
@@ -374,6 +439,7 @@ export default function NuevoPresupuestoPage() {
                 )}
               </TableBody>
             </Table>
+            </div>
           </div>
         </div>
 
@@ -460,8 +526,8 @@ export default function NuevoPresupuestoPage() {
         </div>
 
         <div className="flex flex-row justify-end gap-3 sm:gap-4 pt-4 w-full">
-          <Button variant="outline" onClick={() => router.push('/dashboard/presupuestos')} className="flex-1 sm:flex-none h-11 sm:h-auto">Cancelar</Button>
-          <Button onClick={handleSubmit} disabled={loading} size="lg" className="flex-1 sm:flex-none px-4 sm:px-8 bg-blue-600 hover:bg-blue-700 text-white h-11 sm:h-auto">
+          <Button variant="outline" size="lg" onClick={() => router.push('/dashboard/presupuestos')} className="flex-1 sm:flex-none border-zinc-300 text-zinc-900 hover:bg-zinc-100">Cancelar</Button>
+          <Button onClick={handleSubmit} disabled={loading} size="lg" className="flex-1 sm:flex-none px-4 sm:px-8 bg-zinc-900 hover:bg-zinc-800 text-white">
             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
             Guardar
           </Button>

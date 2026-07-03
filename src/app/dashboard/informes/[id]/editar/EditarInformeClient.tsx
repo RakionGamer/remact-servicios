@@ -234,21 +234,21 @@ export function EditarInformeClient({ informe, clientes }: { informe: any, clien
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-12">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" asChild>
+          <Button variant="outline" size="icon" asChild className="shrink-0">
             <Link href={`/dashboard/informes/${informe.id}`}>
               <ArrowLeft className="w-4 h-4" />
             </Link>
           </Button>
-          <h1 className="text-2xl font-bold tracking-tight">Editar Informe N°{informe.id}</h1>
+          <h1 className="text-2xl font-bold tracking-tight line-clamp-1">Editar Informe N°{informe.id}</h1>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant={"outline"} className={cn("w-[200px] justify-start text-left font-normal bg-white h-10 shadow-sm", !fechaInforme && "text-muted-foreground")}>
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {fechaInforme ? format(fechaInforme, "PPP", { locale: es }) : <span>Seleccionar fecha</span>}
+              <Button variant={"outline"} className={cn("w-full sm:w-[200px] justify-start text-left font-normal bg-white h-10 shadow-sm", !fechaInforme && "text-muted-foreground")}>
+                <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+                <span className="truncate">{fechaInforme ? format(fechaInforme, "PPP", { locale: es }) : <span>Seleccionar fecha</span>}</span>
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="end">

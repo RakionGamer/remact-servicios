@@ -93,7 +93,94 @@ export function InformesTable({
 
   return (
     <TooltipProvider delayDuration={0}>
-      <div className="bg-white rounded-md border shadow-sm">
+      {/* Vista Móvil (Tarjetas) */}
+      <div className="md:hidden space-y-4">
+        {informes.length > 0 ? (
+          informes.map((i: any) => (
+            <div key={i.id} className="bg-white rounded-xl border border-zinc-200 shadow-sm p-5 space-y-4">
+              <div className="flex justify-between items-start gap-4">
+                <div className="space-y-1">
+                  <div className="text-xs text-zinc-500 font-medium">#{i.id}</div>
+                  <div className="font-bold text-base text-zinc-900 leading-tight">{i.cliente_nombre}</div>
+                </div>
+                <div className="shrink-0 text-right">
+                  <span className="text-xs font-semibold text-zinc-600 bg-zinc-100 px-2 py-1 rounded-md">
+                    {formatDate(i.fecha_informe)}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <span className="text-zinc-500 text-xs block mb-0.5">Obra</span>
+                  <span className="font-medium text-zinc-800 line-clamp-2">{i.direccion_obra || '-'}</span>
+                </div>
+                <div>
+                  <span className="text-zinc-500 text-xs block mb-0.5">Solicitado Por</span>
+                  <span className="font-medium text-zinc-800 line-clamp-2">{i.solicitado_por || '-'}</span>
+                </div>
+              </div>
+              
+              <div className="pt-4 border-t border-zinc-100 flex justify-end items-center">
+                <div className="flex items-center gap-1 bg-zinc-50 rounded-lg p-1 border border-zinc-100">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="sm" asChild className="h-8 w-8 p-0 text-zinc-500 hover:text-blue-600 hover:bg-blue-100">
+                        <Link href={`/dashboard/informes/${i.id}`}>
+                          <Eye className="w-4 h-4" />
+                        </Link>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Ver Informe</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 w-8 p-0 text-zinc-500 hover:text-blue-600 hover:bg-blue-100"
+                        onClick={() => downloadPDF(i)}
+                        disabled={isGenerating === i.id}
+                      >
+                        {isGenerating === i.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Descargar PDF</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  {isAdmin && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-100"
+                          onClick={() => setDeleteId(i.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Eliminar informe</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="bg-white rounded-xl border p-8 text-center text-muted-foreground shadow-sm">
+            No hay informes registrados.
+          </div>
+        )}
+      </div>
+
+      {/* Vista Desktop (Tabla) */}
+      <div className="hidden md:block bg-white rounded-md border shadow-sm">
         <Table>
           <TableHeader>
             <TableRow>
@@ -184,11 +271,11 @@ export function InformesTable({
               ¿Estás seguro de que deseas eliminar el informe #{deleteId}? Esta acción no se puede deshacer.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button type="button" variant="outline" onClick={() => setDeleteId(null)} disabled={isDeleting}>
+          <DialogFooter className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-2 mt-4 sm:mt-0 w-full">
+            <Button size="lg" type="button" variant="outline" onClick={() => setDeleteId(null)} disabled={isDeleting} className="flex-1 sm:flex-none">
               Cancelar
             </Button>
-            <Button type="button" variant="destructive" onClick={handleConfirmDelete} disabled={isDeleting}>
+            <Button size="lg" type="button" variant="destructive" onClick={handleConfirmDelete} disabled={isDeleting} className="flex-1 sm:flex-none">
               {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
               Eliminar
             </Button>

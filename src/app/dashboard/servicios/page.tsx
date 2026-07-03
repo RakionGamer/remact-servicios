@@ -20,14 +20,10 @@ export default async function ServiciosPage({ searchParams }: { searchParams: Pr
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Catálogo de Servicios</h1>
-        <ServicioFormModal />
-      </div>
-
       <ServiciosTable 
         initialServicios={servicios} 
         searchElement={<SearchInput placeholder="Buscar por ítem o zona..." />}
+        headerAction={<ServicioFormModal />}
       />
     </div>
   );

@@ -216,19 +216,39 @@ export function PresupuestosTable({
     <TooltipProvider delayDuration={0}>
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <h1 className="text-2xl font-bold tracking-tight">Presupuestos</h1>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 w-full sm:w-auto">
+            <div className="flex items-center gap-4 justify-between w-full sm:w-auto sm:justify-start">
+              <h1 className="text-2xl font-bold tracking-tight">Presupuestos</h1>
+              <div className="flex sm:hidden items-center space-x-2 text-sm text-muted-foreground">
+                <span className="hidden sm:inline">Mostrar</span>
+                <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
+                  <SelectTrigger className="h-8 w-[70px]">
+                    <SelectValue placeholder={pageSize.toString()} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="5">5</SelectItem>
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="20">20</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                    <SelectItem value="all">Todos</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span className="hidden sm:inline">registros</span>
+              </div>
+            </div>
             <DatePickerWithRange date={dateRange} setDate={setDateRange} />
           </div>
-          {headerAction}
+          <div className="flex items-center gap-4 flex-wrap sm:flex-nowrap w-full sm:w-auto justify-end">
+            {headerAction}
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-1">
           <div className="w-full sm:w-[300px]">
             {searchElement}
           </div>
-
-          <div className="flex flex-wrap items-center gap-4 sm:gap-6 w-full sm:w-auto">
+          
+          <div className="hidden sm:flex items-center gap-4 sm:gap-6 w-full sm:w-auto">
             <div className="flex items-center space-x-2 text-sm text-muted-foreground">
               <span className="hidden sm:inline">Mostrar</span>
               <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
@@ -248,7 +268,105 @@ export function PresupuestosTable({
           </div>
         </div>
 
-        <div className="bg-white rounded-md border shadow-sm">
+        {/* Vista Móvil (Tarjetas) */}
+        <div className="md:hidden space-y-4">
+          {currentPresupuestos.length > 0 ? (
+            currentPresupuestos.map((p: any) => (
+              <div key={p.id} className="bg-white rounded-xl border border-zinc-200 shadow-sm p-5 space-y-4">
+                <div className="flex justify-between items-start gap-4">
+                  <div className="space-y-1">
+                    <div className="text-xs text-zinc-500 font-medium">#{p.id}</div>
+                    <div className="font-bold text-base text-zinc-900 leading-tight">{p.cliente_nombre}</div>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <span className="text-xs font-semibold text-zinc-600 bg-zinc-100 px-2 py-1 rounded-md">
+                      {formatDate(p.fecha_emision)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <span className="text-zinc-500 text-xs block mb-0.5">Motivo</span>
+                    <span className="font-medium text-zinc-800 line-clamp-2">{p.motivo_servicio || '-'}</span>
+                  </div>
+                  <div>
+                    <span className="text-zinc-500 text-xs block mb-0.5">Revisado Por</span>
+                    <span className="font-medium text-zinc-800 line-clamp-2">{p.vendedor_nombre || 'SISTEMA'}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <span className="text-zinc-500 text-xs mb-0.5">Estado</span>
+                    {getStatusBadge(p.estado || 'BORRADOR')}
+                  </div>
+                  <div className="flex flex-col text-right">
+                    <span className="text-zinc-500 text-xs mb-0.5">Total</span>
+                    <span className="font-bold text-emerald-700">
+                      {new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(p.total)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-zinc-100 flex justify-end items-center">
+                  <div className="flex items-center gap-1 bg-zinc-50 rounded-lg p-1 border border-zinc-100">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="sm" asChild className="h-8 w-8 p-0 text-zinc-500 hover:text-blue-600 hover:bg-blue-100">
+                          <Link href={`/dashboard/presupuestos/${p.id}`}>
+                            <Eye className="w-4 h-4" />
+                          </Link>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Ver detalle</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 text-zinc-500 hover:text-amber-600 hover:bg-amber-100"
+                          onClick={() => handleDuplicate(p.id)}
+                          disabled={isDuplicating === p.id}
+                        >
+                          {isDuplicating === p.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Copy className="w-4 h-4" />}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Duplicar presupuesto</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-100"
+                          onClick={() => setDeleteId(p.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Eliminar presupuesto</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="bg-white rounded-xl border p-8 text-center text-muted-foreground shadow-sm">
+              No se encontraron presupuestos.
+            </div>
+          )}
+        </div>
+
+        {/* Vista Desktop (Tabla) */}
+        <div className="hidden md:block bg-white rounded-md border shadow-sm">
           <Table>
             <TableHeader>
               <TableRow>
@@ -382,14 +500,14 @@ export function PresupuestosTable({
               </DialogDescription>
             </DialogHeader>
             <DialogFooter className="flex flex-row justify-end gap-3 sm:gap-2 mt-4 sm:mt-0 w-full">
-            <Button type="button" variant="outline" onClick={() => setDeleteId(null)} disabled={isDeleting} className="flex-1 sm:flex-none h-11 sm:h-10">
-              Cancelar
-            </Button>
-            <Button type="button" variant="destructive" onClick={handleConfirmDelete} disabled={isDeleting} className="flex-1 sm:flex-none h-11 sm:h-10">
-              {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
-              Eliminar
-            </Button>
-          </DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setDeleteId(null)} disabled={isDeleting} className="flex-1 sm:flex-none h-11 sm:h-10">
+                Cancelar
+              </Button>
+              <Button type="button" variant="destructive" onClick={handleConfirmDelete} disabled={isDeleting} className="flex-1 sm:flex-none h-11 sm:h-10">
+                {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+                Eliminar
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

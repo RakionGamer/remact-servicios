@@ -106,7 +106,9 @@ export function ServicioFormModal() {
   return (
     <Dialog open={open} onOpenChange={(val) => { setOpen(val); if (!val) setError(''); }}>
       <DialogTrigger asChild>
-        <Button>Nuevo Servicio</Button>
+        <Button className="bg-zinc-900 hover:bg-zinc-800 text-white shadow-sm font-medium w-full sm:w-auto h-auto py-3 sm:py-2">
+          Nuevo Servicio
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px] p-6">
         <DialogHeader className="mb-4">

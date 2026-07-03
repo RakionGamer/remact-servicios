@@ -29,7 +29,7 @@ export default async function PresupuestosPage({ searchParams }: { searchParams:
         initialPresupuestos={presupuestos}
         searchElement={<SearchInput placeholder="Buscar por cliente, RUT o motivo..." />}
         headerAction={
-          <Button asChild className="bg-zinc-900 hover:bg-zinc-800 text-white shadow-sm font-medium">
+          <Button asChild className="bg-zinc-900 hover:bg-zinc-800 text-white shadow-sm font-medium w-full sm:w-auto h-auto py-3 sm:py-2">
             <Link href="/dashboard/presupuestos/nuevo">
               Nueva Pre-venta
             </Link>

@@ -116,13 +116,12 @@ export function ServiciosSelectionModal({ servicios, initialSelectedIds, onAddSe
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-2xl p-0 overflow-hidden flex flex-col max-h-[85vh]">
+      <DialogContent className="w-[95vw] sm:max-w-2xl p-0 overflow-hidden flex flex-col max-h-[90dvh] sm:max-h-[85vh] rounded-xl">
 
-        {/* 1. HEADER: Añadido 'shrink-0' */}
-        <div className="p-6 pb-4 border-b shrink-0">
+        {/* 1. HEADER */}
+        <div className="p-4 sm:p-6 sm:pb-4 border-b shrink-0">
           <DialogHeader>
-            <DialogTitle className="text-xl">Seleccionar Servicios</DialogTitle>
-
+            <DialogTitle className="text-lg sm:text-xl">Seleccionar Servicios</DialogTitle>
           </DialogHeader>
 
           <div className="flex flex-col sm:flex-row items-center gap-3 mt-4">
@@ -303,22 +302,22 @@ export function ServiciosSelectionModal({ servicios, initialSelectedIds, onAddSe
           )}
         </div>
 
-        {/* 3. FOOTER: Añadido 'shrink-0' */}
-        <div className="p-4 bg-white border-t flex flex-col sm:flex-row justify-between items-center gap-4 shrink-0">
-          <div className="flex flex-col">
+        {/* 3. FOOTER */}
+        <div className="p-4 bg-white border-t flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 shrink-0">
+          <div className="flex flex-col w-full sm:w-auto text-center sm:text-left">
             {!hidePrices && (
-              <span className="text-lg font-bold text-zinc-900">Monto acumulado: <span className="text-emerald-700">{formatMoney(totalMonto)}</span></span>
+              <span className="text-base sm:text-lg font-bold text-zinc-900">Monto: <span className="text-emerald-700">{formatMoney(totalMonto)}</span></span>
             )}
           </div>
 
-          <div className="flex gap-2 w-full sm:w-auto">
-            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)} className="w-full sm:w-auto">
+          <div className="flex flex-row gap-2 sm:gap-2 w-full sm:w-auto">
+            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)} className="flex-1 sm:flex-none h-11 sm:h-10 border-zinc-300 text-zinc-900 hover:bg-zinc-100">
               Cancelar
             </Button>
             <Button
               type="button"
               onClick={handleConfirm}
-              className="w-full sm:w-auto"
+              className="flex-1 sm:flex-none h-11 sm:h-10 bg-zinc-900 hover:bg-zinc-800 text-white"
             >
               Confirmar ({selectedIds.size})
             </Button>
