@@ -6,6 +6,8 @@ import { getSession } from '@/actions/auth';
 
 export async function getPresupuestos() {
   try {
+
+
     const [rows] = await pool.query(`
       SELECT p.*, 
              COALESCE(p.cliente_razon_social, c.razon_social) as cliente_nombre, 
@@ -41,7 +43,7 @@ export async function getPresupuestoById(id: number) {
       LEFT JOIN usuarios a ON p.aprobador_id = a.id
       WHERE p.id = ?
     `, [id]);
-    
+
     if ((presupuestoRows as any[]).length === 0) {
       return { success: false, error: 'Presupuesto no encontrado' };
     }
@@ -55,12 +57,12 @@ export async function getPresupuestoById(id: number) {
       WHERE pd.presupuestos_id = ?
     `, [id]);
 
-    return { 
-      success: true, 
+    return {
+      success: true,
       data: {
         ...((presupuestoRows as any[])[0]),
         detalles: detallesRows as any[]
-      } 
+      }
     };
   } catch (error: any) {
     return { success: false, error: error.message };
@@ -72,7 +74,7 @@ export async function createPresupuesto(data: any) {
   try {
     await connection.beginTransaction();
 
-    const { cliente_id, direccion_historica, fecha_emision, solicitado_por, motivo_servicio, tipo_documento, subtotal, iva, impuesto_total, total, condiciones, detalles } = data;
+    const { cliente_id, direccion_historica, fecha_emision, solicitado_por, motivo_servicio, tipo_documento, subtotal, descuento_porcentaje, descuento_valor, iva, impuesto_total, total, condiciones, detalles } = data;
     const session = await getSession();
     const vendedor_id = session ? session.id : null;
 
@@ -81,9 +83,9 @@ export async function createPresupuesto(data: any) {
 
     const [headerResult] = await connection.query(
       `INSERT INTO presupuestos 
-       (cliente_id, cliente_razon_social, cliente_identificador, cliente_correo, cliente_telefono, cliente_tipo, direccion_historica, vendedor_id, estado, fecha_emision, solicitado_por, motivo_servicio, tipo_documento, subtotal, iva, impuesto_total, total, condiciones) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'BORRADOR', ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [cliente_id, c?.razon_social || null, c?.identificador_fiscal || null, c?.correo || null, c?.telefono || null, c?.tipo_cliente || null, direccion_historica || null, vendedor_id, fecha_emision, solicitado_por, motivo_servicio, tipo_documento, subtotal, iva, impuesto_total, total, condiciones]
+       (cliente_id, cliente_razon_social, cliente_identificador, cliente_correo, cliente_telefono, cliente_tipo, direccion_historica, vendedor_id, estado, fecha_emision, solicitado_por, motivo_servicio, tipo_documento, subtotal, descuento_porcentaje, descuento_valor, iva, impuesto_total, total, condiciones) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'BORRADOR', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [cliente_id, c?.razon_social || null, c?.identificador_fiscal || null, c?.correo || null, c?.telefono || null, c?.tipo_cliente || null, direccion_historica || null, vendedor_id, fecha_emision, solicitado_por, motivo_servicio, tipo_documento, subtotal, descuento_porcentaje || 0, descuento_valor || 0, iva, impuesto_total, total, condiciones]
     );
 
     const presupuestoId = (headerResult as any).insertId;
@@ -190,7 +192,7 @@ export async function updatePresupuesto(id: number, data: any) {
       throw new Error('Solo se pueden modificar presupuestos en borrador, solicitado, revisión o rechazado');
     }
 
-    const { cliente_id, direccion_historica, fecha_emision, solicitado_por, motivo_servicio, tipo_documento, subtotal, iva, impuesto_total, total, condiciones, detalles } = data;
+    const { cliente_id, direccion_historica, fecha_emision, solicitado_por, motivo_servicio, tipo_documento, subtotal, descuento_porcentaje, descuento_valor, iva, impuesto_total, total, condiciones, detalles } = data;
 
     const session = await getSession();
     let nuevoEstado = p.estado;
@@ -206,9 +208,9 @@ export async function updatePresupuesto(id: number, data: any) {
 
     await connection.query(
       `UPDATE presupuestos 
-       SET cliente_id = ?, cliente_razon_social = ?, cliente_identificador = ?, cliente_correo = ?, cliente_telefono = ?, cliente_tipo = ?, direccion_historica = ?, fecha_emision = ?, solicitado_por = ?, motivo_servicio = ?, tipo_documento = ?, subtotal = ?, iva = ?, impuesto_total = ?, total = ?, condiciones = ?, estado = ?, vendedor_id = ?
+       SET cliente_id = ?, cliente_razon_social = ?, cliente_identificador = ?, cliente_correo = ?, cliente_telefono = ?, cliente_tipo = ?, direccion_historica = ?, fecha_emision = ?, solicitado_por = ?, motivo_servicio = ?, tipo_documento = ?, subtotal = ?, descuento_porcentaje = ?, descuento_valor = ?, iva = ?, impuesto_total = ?, total = ?, condiciones = ?, estado = ?, vendedor_id = ?
        WHERE id = ?`,
-      [cliente_id, c?.razon_social || null, c?.identificador_fiscal || null, c?.correo || null, c?.telefono || null, c?.tipo_cliente || null, direccion_historica || null, fecha_emision, solicitado_por, motivo_servicio, tipo_documento, subtotal, iva, impuesto_total, total, condiciones, nuevoEstado, nuevoVendedor, id]
+      [cliente_id, c?.razon_social || null, c?.identificador_fiscal || null, c?.correo || null, c?.telefono || null, c?.tipo_cliente || null, direccion_historica || null, fecha_emision, solicitado_por, motivo_servicio, tipo_documento, subtotal, descuento_porcentaje || 0, descuento_valor || 0, iva, impuesto_total, total, condiciones, nuevoEstado, nuevoVendedor, id]
     );
 
     await connection.query('DELETE FROM presupuestos_detalle WHERE presupuestos_id = ?', [id]);
@@ -256,6 +258,8 @@ export async function duplicatePresupuesto(id: number) {
       motivo_servicio: original.motivo_servicio,
       tipo_documento: 'PRE-VENTA', // Forzar a pre-venta
       subtotal: original.subtotal,
+      descuento_porcentaje: original.descuento_porcentaje,
+      descuento_valor: original.descuento_valor,
       iva: original.iva,
       impuesto_total: original.impuesto_total,
       total: original.total,

@@ -298,8 +298,24 @@ export function PresupuestoPDF({ presupuesto: p, configs, logoUrl }: Props) {
                 {p.condiciones ? `Nota: ${p.condiciones}` : ''}
              </Text>
              <Text style={[styles.totalCellLabel, borderColorStyle]}>SUBTOTAL</Text>
-             <Text style={[styles.totalCellValue, borderColorStyle, { borderRightWidth: 0 }]}>$ {formatMoney(Number(p.subtotal))}</Text>
+             <Text style={[styles.totalCellValue, borderColorStyle, { borderRightWidth: 0 }]}>$ {formatMoney(Number(p.subtotal) + Number(p.descuento_valor || 0))}</Text>
           </View>
+          
+          {Number(p.descuento_valor) > 0 && (
+            <View style={[styles.totalRow, borderColorStyle]}>
+               <Text style={[styles.tableCol, styles.wDesc, borderColorStyle, { borderBottomWidth: 0 }]} />
+               <Text style={[styles.totalCellLabel, borderColorStyle, { color: 'red' }]}>DESCUENTO ({Number(p.descuento_porcentaje)}%)</Text>
+               <Text style={[styles.totalCellValue, borderColorStyle, { borderRightWidth: 0, color: 'red' }]}>$ -{formatMoney(Number(p.descuento_valor))}</Text>
+            </View>
+          )}
+
+          {Number(p.descuento_valor) > 0 && (
+            <View style={[styles.totalRow, borderColorStyle]}>
+               <Text style={[styles.tableCol, styles.wDesc, borderColorStyle, { borderBottomWidth: 0 }]} />
+               <Text style={[styles.totalCellLabel, borderColorStyle]}>SUBTOTAL CON DESCUENTO</Text>
+               <Text style={[styles.totalCellValue, borderColorStyle, { borderRightWidth: 0 }]}>$ {formatMoney(Number(p.subtotal))}</Text>
+            </View>
+          )}
 
           {p.tipo_documento === 'FACTURA' && (
             <View style={[styles.totalRow, borderColorStyle]}>

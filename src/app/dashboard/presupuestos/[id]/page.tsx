@@ -180,12 +180,24 @@ export default async function PresupuestoViewerPage({ params }: { params: Promis
                   <td className="border-[1.5px] px-1 py-1" style={{ borderColor: 'var(--theme-color)' }}></td>
                 </tr>
                 <tr>
-                  <td className="border-[1.5px] px-1 py-1 text-[9px] align-top font-medium whitespace-pre-line" colSpan={1} rowSpan={p.tipo_documento === 'FACTURA' ? 3 : 2} style={{ borderColor: 'var(--theme-color)' }}>
+                  <td className="border-[1.5px] px-1 py-1 text-[9px] align-top font-medium whitespace-pre-line" colSpan={1} rowSpan={p.tipo_documento === 'FACTURA' ? (Number(p.descuento_valor) > 0 ? 4 : 3) : (Number(p.descuento_valor) > 0 ? 3 : 2)} style={{ borderColor: 'var(--theme-color)' }}>
                     {p.condiciones ? `Nota: ${p.condiciones}` : ''}
                   </td>
                   <td className="border-[1.5px] px-1 py-1 bg-[#dce6f1] font-bold" colSpan={3} style={{ borderColor: 'var(--theme-color)' }}>SUBTOTAL</td>
-                  <td className="border-[1.5px] px-1 py-1 text-right font-normal bg-[#ebf1f8]" style={{ borderColor: 'var(--theme-color)' }}><span className="float-left">$</span> {formatMoney(Number(p.subtotal))}</td>
+                  <td className="border-[1.5px] px-1 py-1 text-right font-normal bg-[#ebf1f8]" style={{ borderColor: 'var(--theme-color)' }}><span className="float-left">$</span> {formatMoney(Number(p.subtotal) + Number(p.descuento_valor || 0))}</td>
                 </tr>
+                {Number(p.descuento_valor) > 0 && (
+                  <tr>
+                    <td className="border-[1.5px] px-1 py-1 bg-[#dce6f1] font-bold text-red-600" colSpan={3} style={{ borderColor: 'var(--theme-color)' }}>DESCUENTO ({Number(p.descuento_porcentaje)}%)</td>
+                    <td className="border-[1.5px] px-1 py-1 text-right font-normal bg-[#ebf1f8] text-red-600" style={{ borderColor: 'var(--theme-color)' }}><span className="float-left">$</span> -{formatMoney(Number(p.descuento_valor))}</td>
+                  </tr>
+                )}
+                {Number(p.descuento_valor) > 0 && (
+                  <tr>
+                    <td className="border-[1.5px] px-1 py-1 bg-[#dce6f1] font-bold" colSpan={3} style={{ borderColor: 'var(--theme-color)' }}>SUBTOTAL CON DESCUENTO</td>
+                    <td className="border-[1.5px] px-1 py-1 text-right font-normal bg-[#ebf1f8]" style={{ borderColor: 'var(--theme-color)' }}><span className="float-left">$</span> {formatMoney(Number(p.subtotal))}</td>
+                  </tr>
+                )}
                 {p.tipo_documento === 'FACTURA' && (
                   <tr>
                     <td className="border-[1.5px] px-1 py-1 bg-[#dce6f1] font-bold" colSpan={3} style={{ borderColor: 'var(--theme-color)' }}>IMPUESTOS IVA 19%</td>

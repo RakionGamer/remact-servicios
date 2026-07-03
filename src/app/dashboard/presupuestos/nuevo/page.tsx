@@ -37,6 +37,7 @@ export default function NuevoPresupuestoPage() {
   const [motivo, setMotivo] = useState('');
   const tipoDocumento = 'FACTURA';
   const [condiciones, setCondiciones] = useState('');
+  const [descuentoPorcentaje, setDescuentoPorcentaje] = useState<string>('');
 
   // Form Details State
   const [detalles, setDetalles] = useState<any[]>([]);
@@ -108,9 +109,12 @@ export default function NuevoPresupuestoPage() {
   };
 
   // Calculations
-  const subtotal = detalles.reduce((acc, d) => acc + d.total_linea, 0);
+  const subtotal1 = Math.round(detalles.reduce((acc, d) => acc + d.total_linea, 0));
+  const parsedDescuento = Number(descuentoPorcentaje) || 0;
+  const descuentoValor = Math.round(subtotal1 * (parsedDescuento / 100));
+  const subtotal = subtotal1 - descuentoValor;
   const iva = tipoDocumento === 'FACTURA' ? 0.19 : 0;
-  const impuestoTotal = subtotal * iva;
+  const impuestoTotal = Math.round(subtotal * iva);
   const total = subtotal + impuestoTotal;
 
   const handleSubmit = async () => {
@@ -133,6 +137,8 @@ export default function NuevoPresupuestoPage() {
       motivo_servicio: motivo,
       tipo_documento: tipoDocumento,
       subtotal,
+      descuento_porcentaje: parsedDescuento,
+      descuento_valor: descuentoValor,
       iva,
       impuesto_total: impuestoTotal,
       total,
@@ -252,12 +258,23 @@ export default function NuevoPresupuestoPage() {
             </Popover>
           </div>
 
-          <div className="space-y-1.5 col-span-1 md:col-span-2">
+          <div className="space-y-1.5 col-span-1">
             <label className="text-sm font-semibold text-zinc-800">Motivo del Servicio u Obra</label>
             <Input value={motivo} onChange={e => setMotivo(e.target.value)} placeholder="Ej: Remodelación Oficina Central" className="h-10 bg-white" />
           </div>
 
-
+          <div className="space-y-1.5 col-span-1">
+            <label className="text-sm font-semibold text-zinc-800">Descuento (%)</label>
+            <Input 
+              type="number" 
+              step="any"
+              min="0" 
+              max="100" 
+              value={descuentoPorcentaje} 
+              onChange={e => setDescuentoPorcentaje(e.target.value)} 
+              className="h-10 bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
+            />
+          </div>
         </div>
 
         <hr className="border-zinc-200" />
@@ -382,10 +399,27 @@ export default function NuevoPresupuestoPage() {
 
           <div className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden flex flex-col">
             <div className="p-6 flex-1 flex flex-col justify-center space-y-3 bg-zinc-50/80">
-              <div className="flex justify-between items-center text-zinc-600 text-sm">
-                <span className="font-medium">Subtotal</span>
-                <span className="font-semibold text-zinc-900">{formatMoney(subtotal)}</span>
-              </div>
+              {parsedDescuento > 0 ? (
+                <>
+                  <div className="flex justify-between items-center text-zinc-600 text-sm">
+                    <span className="font-medium">Subtotal</span>
+                    <span className="font-semibold text-zinc-900">{formatMoney(subtotal1)}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-emerald-600 text-sm">
+                    <span className="font-medium">Descuento ({parsedDescuento}%)</span>
+                    <span className="font-semibold">- {formatMoney(descuentoValor)}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-zinc-600 text-sm border-t border-zinc-200 pt-2">
+                    <span className="font-medium">Subtotal con Descuento</span>
+                    <span className="font-semibold text-zinc-900">{formatMoney(subtotal)}</span>
+                  </div>
+                </>
+              ) : (
+                <div className="flex justify-between items-center text-zinc-600 text-sm">
+                  <span className="font-medium">Subtotal</span>
+                  <span className="font-semibold text-zinc-900">{formatMoney(subtotal)}</span>
+                </div>
+              )}
 
               {tipoDocumento === 'FACTURA' && (
                 <div className="flex justify-between items-center text-zinc-600 text-sm">
