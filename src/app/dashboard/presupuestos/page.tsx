@@ -17,7 +17,8 @@ export default async function PresupuestosPage({ searchParams }: { searchParams:
     presupuestos = presupuestos.filter((p: any) =>
       p.cliente_nombre?.toLowerCase().includes(query) ||
       p.cliente_rut?.toLowerCase().includes(query) ||
-      p.motivo_servicio?.toLowerCase().includes(query)
+      p.motivo_servicio?.toLowerCase().includes(query) ||
+      p.id?.toString().includes(query)
     );
   }
 
@@ -27,7 +28,7 @@ export default async function PresupuestosPage({ searchParams }: { searchParams:
     <div className="space-y-6">
       <PresupuestosTable
         initialPresupuestos={presupuestos}
-        searchElement={<SearchInput placeholder="Buscar por cliente, RUT o motivo..." />}
+        searchElement={<SearchInput placeholder="Buscar por N°, cliente, RUT o motivo..." />}
         headerAction={
           <Button asChild className="bg-zinc-900 hover:bg-zinc-800 text-white shadow-sm font-medium w-full sm:w-auto h-auto py-3 sm:py-2">
             <Link href="/dashboard/presupuestos/nuevo">
