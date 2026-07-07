@@ -60,13 +60,8 @@ export function PresupuestosTable({
   const [socket, setSocket] = useState<any>(null);
   const router = useRouter();
 
-  // Date filter initialized from 1st of month to today
-  const today = new Date();
-  const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-  const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: firstDayOfMonth,
-    to: today,
-  });
+  // Por ahora no filtramos por fecha por defecto para mostrar todos los presupuestos
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
 
   const getStatusBadge = (estado: string) => {
     switch (estado) {
