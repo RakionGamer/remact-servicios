@@ -281,3 +281,17 @@ export async function duplicatePresupuesto(id: number) {
     return { success: false, error: error.message };
   }
 }
+
+export async function togglePapeleraPresupuesto(id: number, en_papelera: boolean) {
+  const connection = await pool.getConnection();
+  try {
+    await connection.query('UPDATE presupuestos SET en_papelera = ? WHERE id = ?', [en_papelera ? 1 : 0, id]);
+    revalidatePath('/dashboard/presupuestos');
+    revalidatePath('/portal/presupuestos');
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  } finally {
+    connection.release();
+  }
+}

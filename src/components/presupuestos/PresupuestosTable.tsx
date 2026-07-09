@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { PresupuestoDeleteButton } from '@/components/presupuestos/PresupuestoDeleteButton';
-import { Pencil, ChevronLeft, ChevronRight, Eye, Copy } from 'lucide-react';
+import { Pencil, ChevronLeft, ChevronRight, Eye, Copy, FolderArchive, ArchiveRestore } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { io as ClientIO } from 'socket.io-client';
 import {
@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/select';
 import { DatePickerWithRange } from '@/components/ui/date-range-picker';
 import { DateRange } from "react-day-picker";
-import { deletePresupuesto, duplicatePresupuesto } from '@/actions/presupuestos';
+import { deletePresupuesto, duplicatePresupuesto, togglePapeleraPresupuesto } from '@/actions/presupuestos';
 import { toast } from 'sonner';
 import { Loader2, Trash2 } from 'lucide-react';
 import {
@@ -207,6 +207,20 @@ export function PresupuestosTable({
     setIsDuplicating(null);
   };
 
+  const handleTogglePapelera = async (id: number, toPapelera: boolean) => {
+    setIsDeleting(true);
+    const result = await togglePapeleraPresupuesto(id, toPapelera);
+    if (!result.success) {
+      toast.error(result.error || 'Ocurrió un error al actualizar el presupuesto.');
+    } else {
+      toast.success(toPapelera ? 'Presupuesto movido a papelera.' : 'Presupuesto restaurado.');
+      if (socket) {
+        socket.emit('presupuesto-updated', { roomId: 'presupuestos-list', action: 'list_updated' });
+      }
+    }
+    setIsDeleting(false);
+  };
+
   return (
     <TooltipProvider delayDuration={0}>
       <div className="space-y-4">
@@ -334,21 +348,63 @@ export function PresupuestosTable({
                         <p>Duplicar presupuesto</p>
                       </TooltipContent>
                     </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-100"
-                          onClick={() => setDeleteId(p.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Eliminar presupuesto</p>
-                      </TooltipContent>
-                    </Tooltip>
+
+                    {p.en_papelera === 1 ? (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100"
+                            onClick={() => handleTogglePapelera(p.id, false)}
+                            disabled={isDeleting}
+                          >
+                            <ArchiveRestore className="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Restaurar de papelera</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    ) : (
+                      <>
+                        {p.estado === 'APROBADO' && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0 text-amber-600 hover:text-amber-700 hover:bg-amber-100"
+                                onClick={() => handleTogglePapelera(p.id, true)}
+                                disabled={isDeleting}
+                              >
+                                <FolderArchive className="w-4 h-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Mover a papelera</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                        {(!p.estado || p.estado === 'BORRADOR' || p.estado === 'RECHAZADO' || p.estado === 'SOLICITADO' || p.estado === 'EN_REVISION') && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-100"
+                                onClick={() => setDeleteId(p.id)}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Eliminar presupuesto</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -422,25 +478,60 @@ export function PresupuestosTable({
                           </TooltipContent>
                         </Tooltip>
 
-                        {(!p.estado || p.estado === 'BORRADOR' || p.estado === 'RECHAZADO' || p.estado === 'SOLICITADO' || p.estado === 'EN_REVISION') && (
+                        {p.en_papelera === 1 ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 px-2"
+                                onClick={() => handleTogglePapelera(p.id, false)}
+                                disabled={isDeleting}
+                              >
+                                <ArchiveRestore className="w-4 h-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Restaurar de papelera</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        ) : (
                           <>
-
-
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-red-500 hover:text-red-700 hover:bg-red-50 px-2"
-                                  onClick={() => setDeleteId(p.id)}
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Eliminar presupuesto</p>
-                              </TooltipContent>
-                            </Tooltip>
+                            {p.estado === 'APROBADO' && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 px-2"
+                                    onClick={() => handleTogglePapelera(p.id, true)}
+                                    disabled={isDeleting}
+                                  >
+                                    <FolderArchive className="w-4 h-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Mover a papelera</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
+                            {(!p.estado || p.estado === 'BORRADOR' || p.estado === 'RECHAZADO' || p.estado === 'SOLICITADO' || p.estado === 'EN_REVISION') && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-red-500 hover:text-red-700 hover:bg-red-50 px-2"
+                                    onClick={() => setDeleteId(p.id)}
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Eliminar presupuesto</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
                           </>
                         )}
                       </div>
