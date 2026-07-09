@@ -108,7 +108,7 @@ export function PresupuestoDetalleDinamico({ presupuestoId, initialData, isPorta
                 {p.detalles?.map((item: any, i: number) => (
                   <TableRow key={i}>
                     <TableCell className="font-medium">{item.servicio_nombre}</TableCell>
-                    <TableCell className="text-center">{Math.round(Number(item.cantidad))}</TableCell>
+                    <TableCell className="text-center">{Number(item.cantidad).toLocaleString('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                     <TableCell className="text-right">${formatMoney(Number(item.precio_unitario_historico))}</TableCell>
                     <TableCell className="text-right font-semibold">${formatMoney(Number(item.total_linea))}</TableCell>
                   </TableRow>

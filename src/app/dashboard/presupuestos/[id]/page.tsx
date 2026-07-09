@@ -154,7 +154,7 @@ export default async function PresupuestoViewerPage({ params }: { params: Promis
                 {p.detalles?.map((item: any, i: number) => (
                   <tr key={i}>
                     <td className="border-[1.5px] px-1 py-0.5 font-normal" style={{ borderColor: 'var(--theme-color)' }}>{item.servicio_nombre}</td>
-                    <td className="border-[1.5px] px-1 py-0.5 text-center font-normal text-black" style={{ borderColor: 'var(--theme-color)' }}>{Math.round(Number(item.cantidad))}</td>
+                    <td className="border-[1.5px] px-1 py-0.5 text-center font-normal text-black" style={{ borderColor: 'var(--theme-color)' }}>{Number(item.cantidad).toLocaleString('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                     <td className="border-[1.5px] px-1 py-0.5 text-center font-normal" style={{ borderColor: 'var(--theme-color)' }}>{item.unidad_medida || 'UNID.'}</td>
                     <td className="border-[1.5px] px-1 py-0.5 text-right font-normal" style={{ borderColor: 'var(--theme-color)' }}>
                       <span className="float-left">$</span> {formatMoney(Number(item.precio_unitario_historico))}

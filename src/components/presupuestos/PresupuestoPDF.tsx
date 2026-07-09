@@ -274,7 +274,7 @@ export function PresupuestoPDF({ presupuesto: p, configs, logoUrl }: Props) {
           {p.detalles?.map((item: any, i: number) => (
             <View key={i} style={[styles.tableRow, borderColorStyle]}>
               <Text style={[styles.tableCol, styles.wDesc, borderColorStyle]}>{item.servicio_nombre}</Text>
-              <Text style={[styles.tableCol, styles.wCant, borderColorStyle]}>{Math.round(Number(item.cantidad))}</Text>
+              <Text style={[styles.tableCol, styles.wCant, borderColorStyle]}>{Number(item.cantidad).toLocaleString('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
               <Text style={[styles.tableCol, styles.wUnid, borderColorStyle]}>{item.unidad_medida || 'UNID.'}</Text>
               <Text style={[styles.tableCol, styles.wPrecio, borderColorStyle]}>$ {formatMoney(Number(item.precio_unitario_historico))}</Text>
               <Text style={[styles.tableCol, styles.wImporte, borderColorStyle, { borderRightWidth: 0 }]}>$ {formatMoney(Number(item.total_linea))}</Text>
@@ -292,43 +292,48 @@ export function PresupuestoPDF({ presupuesto: p, configs, logoUrl }: Props) {
             </View>
           ))}
 
-          {/* Totals */}
-          <View style={[styles.totalRow, borderColorStyle]}>
-             <Text style={[styles.tableCol, styles.wDesc, borderColorStyle, { fontSize: 8 }]}>
-                {p.condiciones ? `Nota: ${p.condiciones}` : ''}
-             </Text>
-             <Text style={[styles.totalCellLabel, borderColorStyle]}>SUBTOTAL</Text>
-             <Text style={[styles.totalCellValue, borderColorStyle, { borderRightWidth: 0 }]}>$ {formatMoney(Number(p.subtotal) + Number(p.descuento_valor || 0))}</Text>
-          </View>
-          
-          {Number(p.descuento_valor) > 0 && (
-            <View style={[styles.totalRow, borderColorStyle]}>
-               <Text style={[styles.tableCol, styles.wDesc, borderColorStyle, { borderBottomWidth: 0 }]} />
-               <Text style={[styles.totalCellLabel, borderColorStyle, { color: 'red' }]}>DESCUENTO ({Number(p.descuento_porcentaje)}%)</Text>
-               <Text style={[styles.totalCellValue, borderColorStyle, { borderRightWidth: 0, color: 'red' }]}>$ -{formatMoney(Number(p.descuento_valor))}</Text>
+          {/* Totals Section */}
+          <View style={[{ flexDirection: 'row', borderBottomWidth: 1 }, borderColorStyle]}>
+            {/* Left side: Note */}
+            <View style={[styles.wDesc, borderColorStyle, { borderRightWidth: 1, padding: 4 }]}>
+              <Text style={{ fontSize: 8 }}>
+                {p.condiciones ? `Nota:\n${p.condiciones}` : ''}
+              </Text>
             </View>
-          )}
 
-          {Number(p.descuento_valor) > 0 && (
-            <View style={[styles.totalRow, borderColorStyle]}>
-               <Text style={[styles.tableCol, styles.wDesc, borderColorStyle, { borderBottomWidth: 0 }]} />
-               <Text style={[styles.totalCellLabel, borderColorStyle]}>SUBTOTAL CON DESCUENTO</Text>
-               <Text style={[styles.totalCellValue, borderColorStyle, { borderRightWidth: 0 }]}>$ {formatMoney(Number(p.subtotal))}</Text>
+            {/* Right side: Totals */}
+            <View style={{ width: 225 }}>
+              <View style={[styles.totalRow, borderColorStyle]}>
+                 <Text style={[styles.totalCellLabel, borderColorStyle]}>SUBTOTAL</Text>
+                 <Text style={[styles.totalCellValue, borderColorStyle]}>$ {formatMoney(Number(p.subtotal) + Number(p.descuento_valor || 0))}</Text>
+              </View>
+              
+              {Number(p.descuento_valor) > 0 && (
+                <View style={[styles.totalRow, borderColorStyle]}>
+                   <Text style={[styles.totalCellLabel, borderColorStyle, { color: 'red' }]}>DESCUENTO ({Number(p.descuento_porcentaje)}%)</Text>
+                   <Text style={[styles.totalCellValue, borderColorStyle, { color: 'red' }]}>$ -{formatMoney(Number(p.descuento_valor))}</Text>
+                </View>
+              )}
+
+              {Number(p.descuento_valor) > 0 && (
+                <View style={[styles.totalRow, borderColorStyle]}>
+                   <Text style={[styles.totalCellLabel, borderColorStyle]}>SUBTOTAL CON DESCUENTO</Text>
+                   <Text style={[styles.totalCellValue, borderColorStyle]}>$ {formatMoney(Number(p.subtotal))}</Text>
+                </View>
+              )}
+
+              {p.tipo_documento === 'FACTURA' && (
+                <View style={[styles.totalRow, borderColorStyle]}>
+                   <Text style={[styles.totalCellLabel, borderColorStyle]}>IMPUESTOS IVA 19%</Text>
+                   <Text style={[styles.totalCellValue, borderColorStyle]}>$ {formatMoney(Number(p.impuesto_total))}</Text>
+                </View>
+              )}
+
+              <View style={[{ flexDirection: 'row' }]}>
+                 <Text style={[styles.totalCellLabel, borderColorStyle, { borderBottomWidth: 0 }]}>TOTAL</Text>
+                 <Text style={[styles.totalCellValue, borderColorStyle, { borderBottomWidth: 0 }]}>$ {formatMoney(Number(p.total))}</Text>
+              </View>
             </View>
-          )}
-
-          {p.tipo_documento === 'FACTURA' && (
-            <View style={[styles.totalRow, borderColorStyle]}>
-               <Text style={[styles.tableCol, styles.wDesc, borderColorStyle, { borderBottomWidth: 0 }]} />
-               <Text style={[styles.totalCellLabel, borderColorStyle]}>IMPUESTOS IVA 19%</Text>
-               <Text style={[styles.totalCellValue, borderColorStyle, { borderRightWidth: 0 }]}>$ {formatMoney(Number(p.impuesto_total))}</Text>
-            </View>
-          )}
-
-          <View style={[styles.totalRow, borderColorStyle]}>
-             <Text style={[styles.tableCol, styles.wDesc, borderColorStyle, { borderBottomWidth: 0 }]} />
-             <Text style={[styles.totalCellLabel, borderColorStyle]}>TOTAL</Text>
-             <Text style={[styles.totalCellValue, borderColorStyle, { borderRightWidth: 0 }]}>$ {formatMoney(Number(p.total))}</Text>
           </View>
         </View>
 
