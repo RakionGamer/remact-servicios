@@ -6,10 +6,7 @@ const themeColor = '#2563eb'; // Remact blue
 
 const styles = StyleSheet.create({
   page: {
-    paddingTop: 24,
-    paddingLeft: 24,
-    paddingRight: 24,
-    paddingBottom: 40,
+    padding: 24,
     fontFamily: 'Helvetica',
     fontSize: 9,
     color: '#000'
@@ -236,18 +233,6 @@ export function InformePDF({ informe: i, configs, logoUrl, imagenesLayout }: Pro
   return (
     <Document>
       <Page size="A4" style={styles.page} wrap>
-        {/* Footer fijo en todas las páginas */}
-        {Boolean(i.link_fotografias) && (
-          <View fixed style={{ position: 'absolute', bottom: 15, left: 0, right: 0, alignItems: 'center' }}>
-            <Text style={styles.footerLinkText}>
-              Para visualizar todas las fotos y videos en Google Drive,{' '}
-              <Link src={i.link_fotografias} style={styles.footerLink}>
-                haz click aquí
-              </Link>
-            </Text>
-          </View>
-        )}
-
         {/* Encabezado Principal */}
         <View style={styles.topBox} wrap={false}>
           <View style={styles.topRow}>
@@ -258,7 +243,7 @@ export function InformePDF({ informe: i, configs, logoUrl, imagenesLayout }: Pro
               <Text style={styles.numberText}>N° {i.id}</Text>
             </View>
           </View>
-          
+
           <View style={styles.headerBottomRow}>
             <View style={styles.transferContainer}>
               <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8, color: themeColor, marginBottom: 4 }}>DIRECCIÓN DE OBRA</Text>
@@ -356,7 +341,7 @@ export function InformePDF({ informe: i, configs, logoUrl, imagenesLayout }: Pro
               </View>
             </View>
 
-            <View style={{ width: '100%', minHeight: '100%', borderWidth: 1, borderColor: themeColor, flexGrow: 1 }} break>
+            <View style={{ width: '100%', flexGrow: 1, borderWidth: 1, borderColor: themeColor }} break>
               {/* Esta línea dibujará el borde inferior en TODAS las páginas que ocupe este contenedor, cerrando la caja al hacer saltos de página */}
               <View fixed style={{ position: 'absolute', bottom: 0, left: 0, right: 0, borderBottomWidth: 1, borderColor: themeColor }} />
 
@@ -369,7 +354,7 @@ export function InformePDF({ informe: i, configs, logoUrl, imagenesLayout }: Pro
                       const isFirstRow = rIdx === 0;
                       const hasTag = Boolean(group.tag);
                       const isFirstOverall = gIdx === 0 && rIdx === 0;
-                      
+
                       const rowContent = (
                         <View style={[styles.imageRowLast, { flexGrow: 1 }]}>
                           {Array.isArray(row) && row.map((img, iIdx) => {
@@ -410,9 +395,17 @@ export function InformePDF({ informe: i, configs, logoUrl, imagenesLayout }: Pro
           </>
         )}
 
-
-
-
+        {/* Footer Link al final del documento */}
+        {Boolean(i.link_fotografias) && (
+          <View wrap={false} style={[styles.footerLinkContainer, { marginTop: 'auto' }]}>
+            <Text style={styles.footerLinkText}>
+              Si desea visualizar más fotografías,{' '}
+              <Link src={i.link_fotografias} style={styles.footerLink}>
+                haz click aquí
+              </Link>
+            </Text>
+          </View>
+        )}
       </Page>
     </Document>
   );
