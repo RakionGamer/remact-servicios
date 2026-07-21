@@ -6,7 +6,10 @@ const themeColor = '#2563eb'; // Remact blue
 
 const styles = StyleSheet.create({
   page: {
-    padding: 24,
+    paddingTop: 24,
+    paddingLeft: 24,
+    paddingRight: 24,
+    paddingBottom: 40,
     fontFamily: 'Helvetica',
     fontSize: 9,
     color: '#000'
@@ -233,6 +236,18 @@ export function InformePDF({ informe: i, configs, logoUrl, imagenesLayout }: Pro
   return (
     <Document>
       <Page size="A4" style={styles.page} wrap>
+        {/* Footer fijo en todas las páginas */}
+        {Boolean(i.link_fotografias) && (
+          <View fixed style={{ position: 'absolute', bottom: 15, left: 0, right: 0, alignItems: 'center' }}>
+            <Text style={styles.footerLinkText}>
+              Para visualizar todas las fotos y videos en Google Drive,{' '}
+              <Link src={i.link_fotografias} style={styles.footerLink}>
+                haz click aquí
+              </Link>
+            </Text>
+          </View>
+        )}
+
         {/* Encabezado Principal */}
         <View style={styles.topBox} wrap={false}>
           <View style={styles.topRow}>
@@ -332,22 +347,10 @@ export function InformePDF({ informe: i, configs, logoUrl, imagenesLayout }: Pro
           </View>
         )}
 
-        {/* Footer Link en la primera página */}
-        {Boolean(i.link_fotografias) && (
-          <View wrap={false} style={[styles.footerLinkContainer, { marginTop: 'auto', marginBottom: 16 }]}>
-            <Text style={styles.footerLinkText}>
-              Para visualizar todas las fotos y videos en Google Drive,{' '}
-              <Link src={i.link_fotografias} style={styles.footerLink}>
-                haz click aquí
-              </Link>
-            </Text>
-          </View>
-        )}
-
         {/* Registro Fotográfico (Movido a la primera página) */}
         {imagenesLayout && imagenesLayout.length > 0 && (
           <>
-            <View style={[styles.sectionBox, { marginTop: i.link_fotografias ? 0 : 'auto' }]}>
+            <View style={[styles.sectionBox, { marginTop: 'auto' }]}>
               <View style={styles.sectionHeader}>
                 <Text>REGISTRO FOTOGRÁFICO</Text>
               </View>
