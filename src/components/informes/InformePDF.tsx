@@ -332,16 +332,28 @@ export function InformePDF({ informe: i, configs, logoUrl, imagenesLayout }: Pro
           </View>
         )}
 
+        {/* Footer Link en la primera página */}
+        {Boolean(i.link_fotografias) && (
+          <View wrap={false} style={[styles.footerLinkContainer, { marginTop: 'auto', marginBottom: 16 }]}>
+            <Text style={styles.footerLinkText}>
+              Para visualizar todas las fotos y videos en Google Drive,{' '}
+              <Link src={i.link_fotografias} style={styles.footerLink}>
+                haz click aquí
+              </Link>
+            </Text>
+          </View>
+        )}
+
         {/* Registro Fotográfico (Movido a la primera página) */}
         {imagenesLayout && imagenesLayout.length > 0 && (
           <>
-            <View style={[styles.sectionBox, { marginTop: 'auto' }]}>
+            <View style={[styles.sectionBox, { marginTop: i.link_fotografias ? 0 : 'auto' }]}>
               <View style={styles.sectionHeader}>
                 <Text>REGISTRO FOTOGRÁFICO</Text>
               </View>
             </View>
 
-            <View style={{ width: '100%', minHeight: '100%', borderWidth: 1, borderColor: themeColor }} break>
+            <View style={{ width: '100%', minHeight: '100%', borderWidth: 1, borderColor: themeColor, flexGrow: 1 }} break>
               {/* Esta línea dibujará el borde inferior en TODAS las páginas que ocupe este contenedor, cerrando la caja al hacer saltos de página */}
               <View fixed style={{ position: 'absolute', bottom: 0, left: 0, right: 0, borderBottomWidth: 1, borderColor: themeColor }} />
 
@@ -349,14 +361,14 @@ export function InformePDF({ informe: i, configs, logoUrl, imagenesLayout }: Pro
                 const allRows = Array.isArray(group.layout) ? group.layout : [];
 
                 return (
-                  <View key={gIdx} style={{ width: '100%' }}>
+                  <View key={gIdx} style={{ width: '100%', flexGrow: 1 }}>
                     {allRows.map((row, rIdx) => {
                       const isFirstRow = rIdx === 0;
                       const hasTag = Boolean(group.tag);
                       const isFirstOverall = gIdx === 0 && rIdx === 0;
                       
                       const rowContent = (
-                        <View style={styles.imageRowLast}>
+                        <View style={[styles.imageRowLast, { flexGrow: 1 }]}>
                           {Array.isArray(row) && row.map((img, iIdx) => {
                             const isLastImg = iIdx === row.length - 1;
                             return (
@@ -364,7 +376,7 @@ export function InformePDF({ informe: i, configs, logoUrl, imagenesLayout }: Pro
                                 key={iIdx}
                                 style={[
                                   isLastImg ? styles.imageCellLast : styles.imageCell,
-                                  { height: 580 }
+                                  { minHeight: 580, flexGrow: 1 }
                                 ]}
                               >
                                 <Image
@@ -378,7 +390,7 @@ export function InformePDF({ informe: i, configs, logoUrl, imagenesLayout }: Pro
                       );
 
                       return (
-                        <View key={`row-${rIdx}`} wrap={false} style={{ width: '100%', borderTopWidth: isFirstOverall ? 0 : 1, borderColor: themeColor }}>
+                        <View key={`row-${rIdx}`} wrap={false} style={{ width: '100%', flexGrow: 1, borderTopWidth: isFirstOverall ? 0 : 1, borderColor: themeColor }}>
                           {isFirstRow && hasTag && (
                             <Text style={styles.groupTag}>
                               {group.tag}
@@ -398,17 +410,6 @@ export function InformePDF({ informe: i, configs, logoUrl, imagenesLayout }: Pro
 
 
 
-        {/* Footer Link */}
-        {Boolean(i.link_fotografias) && (
-          <View wrap={false} style={styles.footerLinkContainer}>
-            <Text style={styles.footerLinkText}>
-              Si desea visualizar más fotografías{' '}
-              <Link src={i.link_fotografias} style={styles.footerLink}>
-                haz click aquí
-              </Link>
-            </Text>
-          </View>
-        )}
       </Page>
     </Document>
   );
