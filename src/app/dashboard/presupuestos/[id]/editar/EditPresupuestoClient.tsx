@@ -52,7 +52,7 @@ export default function EditPresupuestoClient({ initialData, userRole }: { initi
   // Form Details State
   const [detalles, setDetalles] = useState<any[]>(initialData.detalles.map((d: any) => ({
     id: d.id,
-    servicio_id: d.servicio_id.toString(),
+    servicio_id: d.servicio_id ? d.servicio_id.toString() : '',
     servicio_nombre: d.servicio_nombre,
     cantidad: Number(d.cantidad) || 0,
     precio_unitario: Number(d.precio_unitario_historico) || 0,
@@ -164,7 +164,8 @@ export default function EditPresupuestoClient({ initialData, userRole }: { initi
       total,
       condiciones,
       detalles: detalles.map(d => ({
-        servicio_id: parseInt(d.servicio_id),
+        servicio_id: d.servicio_id ? parseInt(d.servicio_id) : null,
+        servicio_nombre: d.servicio_nombre,
         cantidad: Number(d.cantidad),
         precio_unitario: Number(d.precio_unitario),
         total_linea: Number(d.total_linea)

@@ -98,7 +98,7 @@ export async function createPresupuesto(data: any) {
         `INSERT INTO presupuestos_detalle 
          (presupuestos_id, servicio_id, servicio_item, servicio_caracteristica, servicio_unidad_medida, cantidad, precio_unitario_historico, total_linea) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [presupuestoId, detalle.servicio_id, s?.item || null, s?.caracteristica || null, s?.unidad_medida || null, detalle.cantidad, detalle.precio_unitario, detalle.total_linea]
+        [presupuestoId, detalle.servicio_id, s?.item || detalle.servicio_nombre || null, s?.caracteristica || null, s?.unidad_medida || null, detalle.cantidad, detalle.precio_unitario, detalle.total_linea]
       );
     }
 
@@ -223,7 +223,7 @@ export async function updatePresupuesto(id: number, data: any) {
         `INSERT INTO presupuestos_detalle 
          (presupuestos_id, servicio_id, servicio_item, servicio_caracteristica, servicio_unidad_medida, cantidad, precio_unitario_historico, total_linea) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [id, detalle.servicio_id, s?.item || null, s?.caracteristica || null, s?.unidad_medida || null, detalle.cantidad, detalle.precio_unitario, detalle.total_linea]
+        [id, detalle.servicio_id, s?.item || detalle.servicio_nombre || null, s?.caracteristica || null, s?.unidad_medida || null, detalle.cantidad, detalle.precio_unitario, detalle.total_linea]
       );
     }
 
@@ -266,6 +266,7 @@ export async function duplicatePresupuesto(id: number) {
       condiciones: original.condiciones,
       detalles: original.detalles.map((d: any) => ({
         servicio_id: d.servicio_id,
+        servicio_nombre: d.servicio_nombre,
         cantidad: d.cantidad,
         precio_unitario: d.precio_unitario_historico, // Mapear desde _historico hacia la prop que createPresupuesto espera
         total_linea: d.total_linea
