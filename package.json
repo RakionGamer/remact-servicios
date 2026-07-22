@@ -58,8 +58,7 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "sharp",
-      "unrs-resolver",
-      "puppeteer"
+      "unrs-resolver"
     ]
   }
 }
