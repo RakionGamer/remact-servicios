@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   wUnid: { width: 40, textAlign: 'center' },
   wPrecio: { width: 75, textAlign: 'right' },
   wImporte: { width: 75, textAlign: 'right' },
-  
+
   bgLightBlue: { backgroundColor: '#dce6f1' },
   bgUltraLightBlue: { backgroundColor: '#ebf1f8' },
 
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   totalCellLabel: {
-    width: 150, 
+    width: 150,
     padding: 3,
     fontSize: 7.5,
     fontWeight: 'bold',
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
     borderRightWidth: 1,
   },
   totalCellValue: {
-    width: 75, 
+    width: 75,
     padding: 3,
     fontSize: 7.5,
     textAlign: 'right',
@@ -203,7 +203,7 @@ export function PresupuestoPDF({ presupuesto: p, configs, logoUrl }: Props) {
               <Text style={[styles.numberText, textColorStyle]}>N: {p.id}</Text>
             </View>
           </View>
-          
+
           <View style={styles.bottomRow}>
             <View style={styles.facturacionContainer}>
               <Text style={styles.facturacionText}>{configs['DATOS_FACTURACION'] || ''}</Text>
@@ -304,34 +304,34 @@ export function PresupuestoPDF({ presupuesto: p, configs, logoUrl }: Props) {
             {/* Right side: Totals */}
             <View style={{ width: 225 }}>
               <View style={[styles.totalRow, borderColorStyle]}>
-                 <Text style={[styles.totalCellLabel, borderColorStyle]}>SUBTOTAL</Text>
-                 <Text style={[styles.totalCellValue, borderColorStyle]}>$ {formatMoney(Number(p.subtotal) + Number(p.descuento_valor || 0))}</Text>
+                <Text style={[styles.totalCellLabel, borderColorStyle]}>SUBTOTAL</Text>
+                <Text style={[styles.totalCellValue, borderColorStyle]}>$ {formatMoney(Number(p.subtotal) + Number(p.descuento_valor || 0))}</Text>
               </View>
-              
+
               {Number(p.descuento_valor) > 0 && (
                 <View style={[styles.totalRow, borderColorStyle]}>
-                   <Text style={[styles.totalCellLabel, borderColorStyle, { color: 'red' }]}>DESCUENTO ({Number(p.descuento_porcentaje)}%)</Text>
-                   <Text style={[styles.totalCellValue, borderColorStyle, { color: 'red' }]}>$ -{formatMoney(Number(p.descuento_valor))}</Text>
+                  <Text style={[styles.totalCellLabel, borderColorStyle, { color: 'red' }]}>DESCUENTO ({Number(p.descuento_porcentaje)}%)</Text>
+                  <Text style={[styles.totalCellValue, borderColorStyle, { color: 'red' }]}>$ -{formatMoney(Number(p.descuento_valor))}</Text>
                 </View>
               )}
 
               {Number(p.descuento_valor) > 0 && (
                 <View style={[styles.totalRow, borderColorStyle]}>
-                   <Text style={[styles.totalCellLabel, borderColorStyle]}>SUBTOTAL CON DESCUENTO</Text>
-                   <Text style={[styles.totalCellValue, borderColorStyle]}>$ {formatMoney(Number(p.subtotal))}</Text>
+                  <Text style={[styles.totalCellLabel, borderColorStyle]}>SUBTOTAL CON DESCUENTO</Text>
+                  <Text style={[styles.totalCellValue, borderColorStyle]}>$ {formatMoney(Number(p.subtotal))}</Text>
                 </View>
               )}
 
               {p.tipo_documento === 'FACTURA' && (
                 <View style={[styles.totalRow, borderColorStyle]}>
-                   <Text style={[styles.totalCellLabel, borderColorStyle]}>IMPUESTOS IVA 19%</Text>
-                   <Text style={[styles.totalCellValue, borderColorStyle]}>$ {formatMoney(Number(p.impuesto_total))}</Text>
+                  <Text style={[styles.totalCellLabel, borderColorStyle]}>IMPUESTOS IVA 19%</Text>
+                  <Text style={[styles.totalCellValue, borderColorStyle]}>$ {formatMoney(Number(p.impuesto_total))}</Text>
                 </View>
               )}
 
               <View style={[{ flexDirection: 'row' }]}>
-                 <Text style={[styles.totalCellLabel, borderColorStyle, { borderBottomWidth: 0 }]}>TOTAL</Text>
-                 <Text style={[styles.totalCellValue, borderColorStyle, { borderBottomWidth: 0 }]}>$ {formatMoney(Number(p.total))}</Text>
+                <Text style={[styles.totalCellLabel, borderColorStyle, { borderBottomWidth: 0 }]}>TOTAL</Text>
+                <Text style={[styles.totalCellValue, borderColorStyle, { borderBottomWidth: 0 }]}>$ {formatMoney(Number(p.total))}</Text>
               </View>
             </View>
           </View>

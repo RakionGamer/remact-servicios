@@ -256,7 +256,7 @@ export function PresupuestosTable({
           <div className="w-full sm:w-[300px]">
             {searchElement}
           </div>
-          
+
           <div className="hidden sm:flex items-center gap-4 sm:gap-6 w-full sm:w-auto">
             <div className="flex items-center space-x-2 text-sm text-muted-foreground">
               <span className="hidden sm:inline">Mostrar</span>

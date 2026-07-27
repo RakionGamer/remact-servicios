@@ -109,7 +109,7 @@ export function InformesTable({
                   </span>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
                   <span className="text-zinc-500 text-xs block mb-0.5">Obra</span>
@@ -120,7 +120,7 @@ export function InformesTable({
                   <span className="font-medium text-zinc-800 line-clamp-2">{i.solicitado_por || '-'}</span>
                 </div>
               </div>
-              
+
               <div className="pt-4 border-t border-zinc-100 flex justify-end items-center">
                 <div className="flex items-center gap-1 bg-zinc-50 rounded-lg p-1 border border-zinc-100">
                   <Tooltip>
@@ -137,9 +137,9 @@ export function InformesTable({
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         className="h-8 w-8 p-0 text-zinc-500 hover:text-blue-600 hover:bg-blue-100"
                         onClick={() => downloadPDF(i)}
                         disabled={isGenerating === i.id}
@@ -154,9 +154,9 @@ export function InformesTable({
                   {isAdmin && (
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-100"
                           onClick={() => setDeleteId(i.id)}
                         >
@@ -217,9 +217,9 @@ export function InformesTable({
                       </Tooltip>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             className="px-2 text-zinc-500 hover:text-blue-600 hover:bg-blue-50"
                             onClick={() => downloadPDF(i)}
                             disabled={isGenerating === i.id}
@@ -234,9 +234,9 @@ export function InformesTable({
                       {isAdmin && (
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               className="text-red-500 hover:text-red-700 hover:bg-red-50 px-2"
                               onClick={() => setDeleteId(i.id)}
                             >

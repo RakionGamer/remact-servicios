@@ -29,10 +29,14 @@ export default async function InformeViewerPage({ params }: { params: Promise<{ 
 
   const formatDate = (dateValue: any) => {
     if (!dateValue) return '';
-    const isoStr = new Date(dateValue).toISOString();
-    const dateStr = isoStr.split('T')[0];
-    const [year, month, day] = dateStr.split('-');
-    return `${day}-${month}-${year}`;
+    try {
+      const str = typeof dateValue === 'string' ? dateValue : new Date(dateValue).toISOString();
+      const datePart = str.split('T')[0];
+      const [year, month, day] = datePart.split('-');
+      return `${day}-${month}-${year}`;
+    } catch (e) {
+      return '';
+    }
   };
 
   const trabajosRealizados = i.trabajos_realizados ? (typeof i.trabajos_realizados === 'string' ? JSON.parse(i.trabajos_realizados) : i.trabajos_realizados) : [];

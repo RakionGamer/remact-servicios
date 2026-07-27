@@ -214,10 +214,14 @@ interface Props {
 export function InformePDF({ informe: i, configs, logoUrl, imagenesLayout }: Props) {
   const formatDate = (dateValue: any) => {
     if (!dateValue) return '';
-    const isoStr = new Date(dateValue).toISOString();
-    const dateStr = isoStr.split('T')[0];
-    const [year, month, day] = dateStr.split('-');
-    return `${day}-${month}-${year}`;
+    try {
+      const str = typeof dateValue === 'string' ? dateValue : new Date(dateValue).toISOString();
+      const datePart = str.split('T')[0];
+      const [year, month, day] = datePart.split('-');
+      return `${day}-${month}-${year}`;
+    } catch (e) {
+      return '';
+    }
   };
 
   const parseJson = (val: any) => {
