@@ -217,7 +217,14 @@ export function PresupuestoPDF({ presupuesto: p, configs, logoUrl }: Props) {
                   <Text>FECHA EMISIÓN</Text>
                 </View>
                 <View style={styles.miniTableBody}>
-                  <Text>{typeof p.fecha_emision === 'string' ? p.fecha_emision.substring(0,10).split('-').reverse().join('-') : new Date(p.fecha_emision).toLocaleDateString('es-CL')}</Text>
+                  <Text>{(() => {
+                    if (!p.fecha_emision) return '';
+                    try {
+                      return new Date(p.fecha_emision).toISOString().substring(0,10).split('-').reverse().join('-');
+                    } catch(e) {
+                      return '';
+                    }
+                  })()}</Text>
                 </View>
               </View>
               <View style={[styles.miniTable, borderColorStyle]}>
