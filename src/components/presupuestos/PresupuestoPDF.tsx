@@ -217,7 +217,7 @@ export function PresupuestoPDF({ presupuesto: p, configs, logoUrl }: Props) {
                   <Text>FECHA EMISIÓN</Text>
                 </View>
                 <View style={styles.miniTableBody}>
-                  <Text>{new Date(p.fecha_emision).toLocaleDateString('es-CL')}</Text>
+                  <Text>{typeof p.fecha_emision === 'string' ? p.fecha_emision.substring(0,10).split('-').reverse().join('-') : new Date(p.fecha_emision).toLocaleDateString('es-CL')}</Text>
                 </View>
               </View>
               <View style={[styles.miniTable, borderColorStyle]}>

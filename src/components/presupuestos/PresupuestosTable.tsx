@@ -173,6 +173,9 @@ export function PresupuestosTable({
 
   const formatDate = (dateValue: any) => {
     if (!dateValue) return '';
+    if (typeof dateValue === 'string') {
+      return dateValue.substring(0,10).split('-').reverse().join('-');
+    }
     const isoStr = new Date(dateValue).toISOString();
     const dateStr = isoStr.split('T')[0];
     const [year, month, day] = dateStr.split('-');
