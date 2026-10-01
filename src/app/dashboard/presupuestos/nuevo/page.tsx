@@ -81,7 +81,8 @@ export default function NuevoPresupuestoPage() {
           servicio_nombre: s.item,
           cantidad: 1,
           precio_unitario: parseFloat(s.valor_unitario || 0),
-          total_linea: parseFloat(s.valor_unitario || 0) * 1
+          total_linea: parseFloat(s.valor_unitario || 0) * 1,
+          unidad_medida: s.unidad_medida
         });
       }
     }
@@ -370,7 +371,7 @@ export default function NuevoPresupuestoPage() {
                     
                     <div className="pt-3 flex justify-between items-center border-t border-zinc-100">
                       <span className="text-sm font-semibold text-zinc-600">Subtotal Línea</span>
-                      <span className="font-bold text-emerald-700 text-lg">{formatMoney(d.total_linea)}</span>
+                      <span className="font-bold text-emerald-700 text-lg">{d.unidad_medida === 'UF' ? new Intl.NumberFormat('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(d.total_linea) : formatMoney(d.total_linea)}</span>
                     </div>
                   </div>
                 ))
@@ -421,7 +422,7 @@ export default function NuevoPresupuestoPage() {
                         />
                       </TableCell>
                       <TableCell className="text-right font-semibold text-zinc-800">
-                        {formatMoney(d.total_linea)}
+                        {d.unidad_medida === 'UF' ? new Intl.NumberFormat('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(d.total_linea) : formatMoney(d.total_linea)}
                       </TableCell>
                       <TableCell>
                         <Button

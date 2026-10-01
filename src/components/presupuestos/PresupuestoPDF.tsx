@@ -283,8 +283,8 @@ export function PresupuestoPDF({ presupuesto: p, configs, logoUrl }: Props) {
               <Text style={[styles.tableCol, styles.wDesc, borderColorStyle]}>{item.servicio_nombre}</Text>
               <Text style={[styles.tableCol, styles.wCant, borderColorStyle]}>{Number(item.cantidad).toLocaleString('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
               <Text style={[styles.tableCol, styles.wUnid, borderColorStyle]}>{item.unidad_medida || 'UNID.'}</Text>
-              <Text style={[styles.tableCol, styles.wPrecio, borderColorStyle]}>$ {formatMoney(Number(item.precio_unitario_historico))}</Text>
-              <Text style={[styles.tableCol, styles.wImporte, borderColorStyle, { borderRightWidth: 0 }]}>$ {formatMoney(Number(item.total_linea))}</Text>
+              <Text style={[styles.tableCol, styles.wPrecio, borderColorStyle]}>{item.unidad_medida === 'UF' ? '' : '$ '}{formatMoney(Number(item.precio_unitario_historico))}</Text>
+              <Text style={[styles.tableCol, styles.wImporte, borderColorStyle, { borderRightWidth: 0 }]}>{item.unidad_medida === 'UF' ? '' : '$ '}{formatMoney(Number(item.total_linea))}</Text>
             </View>
           ))}
 

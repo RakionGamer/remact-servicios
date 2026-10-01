@@ -56,7 +56,8 @@ export default function EditPresupuestoClient({ initialData, userRole }: { initi
     servicio_nombre: d.servicio_nombre,
     cantidad: Number(d.cantidad) || 0,
     precio_unitario: Number(d.precio_unitario_historico) || 0,
-    total_linea: Number(d.total_linea) || 0
+    total_linea: Number(d.total_linea) || 0,
+    unidad_medida: d.unidad_medida
   })));
 
   useEffect(() => {
@@ -105,7 +106,8 @@ export default function EditPresupuestoClient({ initialData, userRole }: { initi
           servicio_nombre: s.item,
           cantidad: 1,
           precio_unitario: parseFloat(s.valor_unitario || 0),
-          total_linea: parseFloat(s.valor_unitario || 0) * 1
+          total_linea: parseFloat(s.valor_unitario || 0) * 1,
+          unidad_medida: s.unidad_medida
         });
       }
     }
@@ -437,7 +439,7 @@ export default function EditPresupuestoClient({ initialData, userRole }: { initi
                     
                     <div className="pt-3 flex justify-between items-center border-t border-zinc-100">
                       <span className="text-sm font-semibold text-zinc-600">Subtotal Línea</span>
-                      <span className="font-bold text-emerald-700 text-lg">{formatMoney(d.total_linea)}</span>
+                      <span className="font-bold text-emerald-700 text-lg">{d.unidad_medida === 'UF' ? new Intl.NumberFormat('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(d.total_linea) : formatMoney(d.total_linea)}</span>
                     </div>
                   </div>
                 ))
@@ -488,7 +490,7 @@ export default function EditPresupuestoClient({ initialData, userRole }: { initi
                         />
                       </TableCell>
                       <TableCell className="text-right font-semibold text-zinc-800">
-                        {formatMoney(d.total_linea)}
+                        {d.unidad_medida === 'UF' ? new Intl.NumberFormat('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(d.total_linea) : formatMoney(d.total_linea)}
                       </TableCell>
                       <TableCell>
                         <Button
