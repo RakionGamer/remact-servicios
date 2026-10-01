@@ -130,12 +130,14 @@ export default function EditPresupuestoClient({ initialData, userRole }: { initi
     }));
   };
 
-  const subtotal1 = Math.round(detalles.reduce((acc, d) => acc + d.total_linea, 0));
+  const hasUF = detalles.some(d => d.unidad_medida === 'UF');
+
+  const subtotal1 = hasUF ? detalles.reduce((acc, d) => acc + d.total_linea, 0) : Math.round(detalles.reduce((acc, d) => acc + d.total_linea, 0));
   const parsedDescuento = Number(descuentoPorcentaje) || 0;
-  const descuentoValor = Math.round(subtotal1 * (parsedDescuento / 100));
+  const descuentoValor = hasUF ? (subtotal1 * (parsedDescuento / 100)) : Math.round(subtotal1 * (parsedDescuento / 100));
   const subtotal = subtotal1 - descuentoValor;
   const iva = tipoDocumento === 'FACTURA' ? 0.19 : 0;
-  const impuestoTotal = Math.round(subtotal * iva);
+  const impuestoTotal = hasUF ? (subtotal * iva) : Math.round(subtotal * iva);
   const total = subtotal + impuestoTotal;
 
   const handleSubmit = async () => {
@@ -201,7 +203,7 @@ export default function EditPresupuestoClient({ initialData, userRole }: { initi
   };
 
   const formatMoney = (val: number) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(val);
-  const formatTotal = (val: number) => detalles.some(d => d.unidad_medida === 'UF') ? new Intl.NumberFormat('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(val) : formatMoney(val);
+  const formatTotal = (val: number) => hasUF ? new Intl.NumberFormat('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val) : formatMoney(val);
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-12">
@@ -440,7 +442,7 @@ export default function EditPresupuestoClient({ initialData, userRole }: { initi
                     
                     <div className="pt-3 flex justify-between items-center border-t border-zinc-100">
                       <span className="text-sm font-semibold text-zinc-600">Subtotal Línea</span>
-                      <span className="font-bold text-emerald-700 text-lg">{d.unidad_medida === 'UF' ? new Intl.NumberFormat('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(d.total_linea) : formatMoney(d.total_linea)}</span>
+                      <span className="font-bold text-emerald-700 text-lg">{d.unidad_medida === 'UF' ? new Intl.NumberFormat('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(d.total_linea) : formatMoney(d.total_linea)}</span>
                     </div>
                   </div>
                 ))
@@ -491,7 +493,7 @@ export default function EditPresupuestoClient({ initialData, userRole }: { initi
                         />
                       </TableCell>
                       <TableCell className="text-right font-semibold text-zinc-800">
-                        {d.unidad_medida === 'UF' ? new Intl.NumberFormat('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(d.total_linea) : formatMoney(d.total_linea)}
+                        {d.unidad_medida === 'UF' ? new Intl.NumberFormat('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(d.total_linea) : formatMoney(d.total_linea)}
                       </TableCell>
                       <TableCell>
                         <Button

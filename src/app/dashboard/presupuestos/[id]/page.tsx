@@ -37,7 +37,16 @@ export default async function PresupuestoViewerPage({ params }: { params: Promis
   const configs = resConfigs.success && resConfigs.data ? resConfigs.data : {};
 
   const formatMoney = (val: number) => new Intl.NumberFormat('es-CL', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(val);
+  const formatUF = (val: number) => new Intl.NumberFormat('es-CL', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
   const hasUF = p.detalles?.some((d: any) => d.unidad_medida === 'UF');
+
+  const subtotal1 = hasUF ? p.detalles.reduce((acc: number, d: any) => acc + Number(d.total_linea), 0) : (Number(p.subtotal) + Number(p.descuento_valor || 0));
+  const calcDescuento = hasUF ? (subtotal1 * (Number(p.descuento_porcentaje) / 100)) : Number(p.descuento_valor || 0);
+  const calcSubtotal = hasUF ? (subtotal1 - calcDescuento) : Number(p.subtotal);
+  const calcImpuesto = hasUF ? (calcSubtotal * (p.tipo_documento === 'FACTURA' ? 0.19 : 0)) : Number(p.impuesto_total);
+  const calcTotal = hasUF ? (calcSubtotal + calcImpuesto) : Number(p.total);
+
+  const displayTotal = (val: number) => hasUF ? formatUF(val) : formatMoney(val);
 
   const emptyRowsCount = Math.max(0, 20 - (p.detalles?.length || 0));
   const emptyRows = Array.from({ length: emptyRowsCount });
@@ -158,10 +167,10 @@ export default async function PresupuestoViewerPage({ params }: { params: Promis
                     <td className="border-[1.5px] px-1 py-0.5 text-center font-normal text-black" style={{ borderColor: 'var(--theme-color)' }}>{Number(item.cantidad).toLocaleString('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                     <td className="border-[1.5px] px-1 py-0.5 text-center font-normal" style={{ borderColor: 'var(--theme-color)' }}>{item.unidad_medida || 'UNID.'}</td>
                     <td className="border-[1.5px] px-1 py-0.5 text-right font-normal" style={{ borderColor: 'var(--theme-color)' }}>
-                      {item.unidad_medida !== 'UF' && <span className="float-left">$</span>} {formatMoney(Number(item.precio_unitario_historico))}
+                      {!hasUF && <span className="float-left">$</span>} {item.unidad_medida === 'UF' ? formatUF(Number(item.precio_unitario_historico)) : formatMoney(Number(item.precio_unitario_historico))}
                     </td>
                     <td className="border-[1.5px] px-1 py-0.5 text-right font-normal" style={{ borderColor: 'var(--theme-color)' }}>
-                      {item.unidad_medida !== 'UF' && <span className="float-left">$</span>} {formatMoney(Number(item.total_linea))}
+                      {!hasUF && <span className="float-left">$</span>} {item.unidad_medida === 'UF' ? formatUF(Number(item.total_linea)) : formatMoney(Number(item.total_linea))}
                     </td>
                   </tr>
                 ))}
@@ -185,29 +194,29 @@ export default async function PresupuestoViewerPage({ params }: { params: Promis
                     {p.condiciones ? `Nota: ${p.condiciones}` : ''}
                   </td>
                   <td className="border-[1.5px] px-1 py-1 bg-[#dce6f1] font-bold" colSpan={3} style={{ borderColor: 'var(--theme-color)' }}>SUBTOTAL</td>
-                  <td className="border-[1.5px] px-1 py-1 text-right font-normal bg-[#ebf1f8]" style={{ borderColor: 'var(--theme-color)' }}>{!hasUF && <span className="float-left">$</span>} {formatMoney(Number(p.subtotal) + Number(p.descuento_valor || 0))}</td>
+                  <td className="border-[1.5px] px-1 py-1 text-right font-normal bg-[#ebf1f8]" style={{ borderColor: 'var(--theme-color)' }}>{!hasUF && <span className="float-left">$</span>} {displayTotal(subtotal1)}</td>
                 </tr>
-                {Number(p.descuento_valor) > 0 && (
+                {Number(p.descuento_porcentaje) > 0 && (
                   <tr>
                     <td className="border-[1.5px] px-1 py-1 bg-[#dce6f1] font-bold text-red-600" colSpan={3} style={{ borderColor: 'var(--theme-color)' }}>DESCUENTO ({Number(p.descuento_porcentaje)}%)</td>
-                    <td className="border-[1.5px] px-1 py-1 text-right font-normal bg-[#ebf1f8] text-red-600" style={{ borderColor: 'var(--theme-color)' }}>{!hasUF && <span className="float-left">$</span>} -{formatMoney(Number(p.descuento_valor))}</td>
+                    <td className="border-[1.5px] px-1 py-1 text-right font-normal bg-[#ebf1f8] text-red-600" style={{ borderColor: 'var(--theme-color)' }}>{!hasUF && <span className="float-left">$</span>} -{displayTotal(calcDescuento)}</td>
                   </tr>
                 )}
-                {Number(p.descuento_valor) > 0 && (
+                {Number(p.descuento_porcentaje) > 0 && (
                   <tr>
                     <td className="border-[1.5px] px-1 py-1 bg-[#dce6f1] font-bold" colSpan={3} style={{ borderColor: 'var(--theme-color)' }}>SUBTOTAL CON DESCUENTO</td>
-                    <td className="border-[1.5px] px-1 py-1 text-right font-normal bg-[#ebf1f8]" style={{ borderColor: 'var(--theme-color)' }}>{!hasUF && <span className="float-left">$</span>} {formatMoney(Number(p.subtotal))}</td>
+                    <td className="border-[1.5px] px-1 py-1 text-right font-normal bg-[#ebf1f8]" style={{ borderColor: 'var(--theme-color)' }}>{!hasUF && <span className="float-left">$</span>} {displayTotal(calcSubtotal)}</td>
                   </tr>
                 )}
                 {p.tipo_documento === 'FACTURA' && (
                   <tr>
                     <td className="border-[1.5px] px-1 py-1 bg-[#dce6f1] font-bold" colSpan={3} style={{ borderColor: 'var(--theme-color)' }}>IMPUESTOS IVA 19%</td>
-                    <td className="border-[1.5px] px-1 py-1 text-right font-normal bg-[#ebf1f8]" style={{ borderColor: 'var(--theme-color)' }}>{!hasUF && <span className="float-left">$</span>} {formatMoney(Number(p.impuesto_total))}</td>
+                    <td className="border-[1.5px] px-1 py-1 text-right font-normal bg-[#ebf1f8]" style={{ borderColor: 'var(--theme-color)' }}>{!hasUF && <span className="float-left">$</span>} {displayTotal(calcImpuesto)}</td>
                   </tr>
                 )}
                 <tr>
                   <td className="border-[1.5px] px-1 py-1 bg-[#dce6f1] font-bold" colSpan={3} style={{ borderColor: 'var(--theme-color)' }}>TOTAL</td>
-                  <td className="border-[1.5px] px-1 py-1 text-right font-bold bg-[#ebf1f8]" style={{ borderColor: 'var(--theme-color)' }}>{!hasUF && <span className="float-left">$</span>} {formatMoney(Number(p.total))}</td>
+                  <td className="border-[1.5px] px-1 py-1 text-right font-bold bg-[#ebf1f8]" style={{ borderColor: 'var(--theme-color)' }}>{!hasUF && <span className="float-left">$</span>} {displayTotal(calcTotal)}</td>
                 </tr>
               </tbody>
             </table>

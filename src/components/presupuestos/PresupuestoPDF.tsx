@@ -3,6 +3,7 @@ import { Document, Page, Text, View, StyleSheet, Image, Font } from '@react-pdf/
 
 // Formateador de dinero
 const formatMoney = (val: number) => new Intl.NumberFormat('es-CL', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(val);
+const formatUF = (val: number) => new Intl.NumberFormat('es-CL', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
 
 const styles = StyleSheet.create({
   page: {
@@ -189,6 +190,14 @@ export function PresupuestoPDF({ presupuesto: p, configs, logoUrl }: Props) {
   const emptyRows = Array.from({ length: emptyRowsCount });
   const hasUF = p.detalles?.some((d: any) => d.unidad_medida === 'UF');
 
+  const subtotal1 = hasUF ? p.detalles.reduce((acc: number, d: any) => acc + Number(d.total_linea), 0) : (Number(p.subtotal) + Number(p.descuento_valor || 0));
+  const calcDescuento = hasUF ? (subtotal1 * (Number(p.descuento_porcentaje) / 100)) : Number(p.descuento_valor || 0);
+  const calcSubtotal = hasUF ? (subtotal1 - calcDescuento) : Number(p.subtotal);
+  const calcImpuesto = hasUF ? (calcSubtotal * (p.tipo_documento === 'FACTURA' ? 0.19 : 0)) : Number(p.impuesto_total);
+  const calcTotal = hasUF ? (calcSubtotal + calcImpuesto) : Number(p.total);
+
+  const displayTotal = (val: number) => hasUF ? formatUF(val) : formatMoney(val);
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -284,8 +293,8 @@ export function PresupuestoPDF({ presupuesto: p, configs, logoUrl }: Props) {
               <Text style={[styles.tableCol, styles.wDesc, borderColorStyle]}>{item.servicio_nombre}</Text>
               <Text style={[styles.tableCol, styles.wCant, borderColorStyle]}>{Number(item.cantidad).toLocaleString('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
               <Text style={[styles.tableCol, styles.wUnid, borderColorStyle]}>{item.unidad_medida || 'UNID.'}</Text>
-              <Text style={[styles.tableCol, styles.wPrecio, borderColorStyle]}>{item.unidad_medida === 'UF' ? '' : '$ '}{formatMoney(Number(item.precio_unitario_historico))}</Text>
-              <Text style={[styles.tableCol, styles.wImporte, borderColorStyle, { borderRightWidth: 0 }]}>{item.unidad_medida === 'UF' ? '' : '$ '}{formatMoney(Number(item.total_linea))}</Text>
+              <Text style={[styles.tableCol, styles.wPrecio, borderColorStyle]}>{item.unidad_medida === 'UF' ? '' : '$ '}{item.unidad_medida === 'UF' ? formatUF(Number(item.precio_unitario_historico)) : formatMoney(Number(item.precio_unitario_historico))}</Text>
+              <Text style={[styles.tableCol, styles.wImporte, borderColorStyle, { borderRightWidth: 0 }]}>{item.unidad_medida === 'UF' ? '' : '$ '}{item.unidad_medida === 'UF' ? formatUF(Number(item.total_linea)) : formatMoney(Number(item.total_linea))}</Text>
             </View>
           ))}
 
@@ -313,33 +322,33 @@ export function PresupuestoPDF({ presupuesto: p, configs, logoUrl }: Props) {
             <View style={{ width: 225 }}>
               <View style={[styles.totalRow, borderColorStyle]}>
                 <Text style={[styles.totalCellLabel, borderColorStyle]}>SUBTOTAL</Text>
-                <Text style={[styles.totalCellValue, borderColorStyle]}>{hasUF ? '' : '$ '}{formatMoney(Number(p.subtotal) + Number(p.descuento_valor || 0))}</Text>
+                <Text style={[styles.totalCellValue, borderColorStyle]}>{hasUF ? '' : '$ '}{displayTotal(subtotal1)}</Text>
               </View>
 
-              {Number(p.descuento_valor) > 0 && (
+              {Number(p.descuento_porcentaje) > 0 && (
                 <View style={[styles.totalRow, borderColorStyle]}>
                   <Text style={[styles.totalCellLabel, borderColorStyle, { color: 'red' }]}>DESCUENTO ({Number(p.descuento_porcentaje)}%)</Text>
-                  <Text style={[styles.totalCellValue, borderColorStyle, { color: 'red' }]}>{hasUF ? '' : '$ '}-{formatMoney(Number(p.descuento_valor))}</Text>
+                  <Text style={[styles.totalCellValue, borderColorStyle, { color: 'red' }]}>{hasUF ? '' : '$ '}-{displayTotal(calcDescuento)}</Text>
                 </View>
               )}
 
-              {Number(p.descuento_valor) > 0 && (
+              {Number(p.descuento_porcentaje) > 0 && (
                 <View style={[styles.totalRow, borderColorStyle]}>
                   <Text style={[styles.totalCellLabel, borderColorStyle]}>SUBTOTAL CON DESCUENTO</Text>
-                  <Text style={[styles.totalCellValue, borderColorStyle]}>{hasUF ? '' : '$ '}{formatMoney(Number(p.subtotal))}</Text>
+                  <Text style={[styles.totalCellValue, borderColorStyle]}>{hasUF ? '' : '$ '}{displayTotal(calcSubtotal)}</Text>
                 </View>
               )}
 
               {p.tipo_documento === 'FACTURA' && (
                 <View style={[styles.totalRow, borderColorStyle]}>
                   <Text style={[styles.totalCellLabel, borderColorStyle]}>IMPUESTOS IVA 19%</Text>
-                  <Text style={[styles.totalCellValue, borderColorStyle]}>{hasUF ? '' : '$ '}{formatMoney(Number(p.impuesto_total))}</Text>
+                  <Text style={[styles.totalCellValue, borderColorStyle]}>{hasUF ? '' : '$ '}{displayTotal(calcImpuesto)}</Text>
                 </View>
               )}
 
               <View style={[{ flexDirection: 'row' }]}>
                 <Text style={[styles.totalCellLabel, borderColorStyle, { borderBottomWidth: 0 }]}>TOTAL</Text>
-                <Text style={[styles.totalCellValue, borderColorStyle, { borderBottomWidth: 0 }]}>{hasUF ? '' : '$ '}{formatMoney(Number(p.total))}</Text>
+                <Text style={[styles.totalCellValue, borderColorStyle, { borderBottomWidth: 0 }]}>{hasUF ? '' : '$ '}{displayTotal(calcTotal)}</Text>
               </View>
             </View>
           </View>
