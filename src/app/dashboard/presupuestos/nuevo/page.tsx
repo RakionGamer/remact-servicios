@@ -160,6 +160,7 @@ export default function NuevoPresupuestoPage() {
   };
 
   const formatMoney = (val: number) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(val);
+  const formatTotal = (val: number) => detalles.some(d => d.unidad_medida === 'UF') ? new Intl.NumberFormat('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(val) : formatMoney(val);
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-12">
@@ -493,35 +494,35 @@ export default function NuevoPresupuestoPage() {
                 <>
                   <div className="flex justify-between items-center text-zinc-600 text-sm">
                     <span className="font-medium">Subtotal</span>
-                    <span className="font-semibold text-zinc-900">{formatMoney(subtotal1)}</span>
+                    <span className="font-semibold text-zinc-900">{formatTotal(subtotal1)}</span>
                   </div>
                   <div className="flex justify-between items-center text-emerald-600 text-sm">
                     <span className="font-medium">Descuento ({parsedDescuento}%)</span>
-                    <span className="font-semibold">- {formatMoney(descuentoValor)}</span>
+                    <span className="font-semibold">- {formatTotal(descuentoValor)}</span>
                   </div>
                   <div className="flex justify-between items-center text-zinc-600 text-sm border-t border-zinc-200 pt-2">
                     <span className="font-medium">Subtotal con Descuento</span>
-                    <span className="font-semibold text-zinc-900">{formatMoney(subtotal)}</span>
+                    <span className="font-semibold text-zinc-900">{formatTotal(subtotal)}</span>
                   </div>
                 </>
               ) : (
                 <div className="flex justify-between items-center text-zinc-600 text-sm">
                   <span className="font-medium">Subtotal</span>
-                  <span className="font-semibold text-zinc-900">{formatMoney(subtotal)}</span>
+                  <span className="font-semibold text-zinc-900">{formatTotal(subtotal)}</span>
                 </div>
               )}
 
               {tipoDocumento === 'FACTURA' && (
                 <div className="flex justify-between items-center text-zinc-600 text-sm">
                   <span className="font-medium">IVA (19%)</span>
-                  <span className="font-semibold text-zinc-900">{formatMoney(impuestoTotal)}</span>
+                  <span className="font-semibold text-zinc-900">{formatTotal(impuestoTotal)}</span>
                 </div>
               )}
             </div>
 
             <div className="bg-zinc-900 px-6 py-5 flex justify-between items-center text-white">
               <span className="font-semibold tracking-wider uppercase text-md text-zinc-300">Total a Pagar</span>
-              <span className="font-bold text-3xl tracking-tight text-white-400">{formatMoney(total)}</span>
+              <span className="font-bold text-3xl tracking-tight text-white-400">{formatTotal(total)}</span>
             </div>
           </div>
         </div>

@@ -37,6 +37,7 @@ export default async function PresupuestoViewerPage({ params }: { params: Promis
   const configs = resConfigs.success && resConfigs.data ? resConfigs.data : {};
 
   const formatMoney = (val: number) => new Intl.NumberFormat('es-CL', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(val);
+  const hasUF = p.detalles?.some((d: any) => d.unidad_medida === 'UF');
 
   const emptyRowsCount = Math.max(0, 20 - (p.detalles?.length || 0));
   const emptyRows = Array.from({ length: emptyRowsCount });
@@ -184,29 +185,29 @@ export default async function PresupuestoViewerPage({ params }: { params: Promis
                     {p.condiciones ? `Nota: ${p.condiciones}` : ''}
                   </td>
                   <td className="border-[1.5px] px-1 py-1 bg-[#dce6f1] font-bold" colSpan={3} style={{ borderColor: 'var(--theme-color)' }}>SUBTOTAL</td>
-                  <td className="border-[1.5px] px-1 py-1 text-right font-normal bg-[#ebf1f8]" style={{ borderColor: 'var(--theme-color)' }}><span className="float-left">$</span> {formatMoney(Number(p.subtotal) + Number(p.descuento_valor || 0))}</td>
+                  <td className="border-[1.5px] px-1 py-1 text-right font-normal bg-[#ebf1f8]" style={{ borderColor: 'var(--theme-color)' }}>{!hasUF && <span className="float-left">$</span>} {formatMoney(Number(p.subtotal) + Number(p.descuento_valor || 0))}</td>
                 </tr>
                 {Number(p.descuento_valor) > 0 && (
                   <tr>
                     <td className="border-[1.5px] px-1 py-1 bg-[#dce6f1] font-bold text-red-600" colSpan={3} style={{ borderColor: 'var(--theme-color)' }}>DESCUENTO ({Number(p.descuento_porcentaje)}%)</td>
-                    <td className="border-[1.5px] px-1 py-1 text-right font-normal bg-[#ebf1f8] text-red-600" style={{ borderColor: 'var(--theme-color)' }}><span className="float-left">$</span> -{formatMoney(Number(p.descuento_valor))}</td>
+                    <td className="border-[1.5px] px-1 py-1 text-right font-normal bg-[#ebf1f8] text-red-600" style={{ borderColor: 'var(--theme-color)' }}>{!hasUF && <span className="float-left">$</span>} -{formatMoney(Number(p.descuento_valor))}</td>
                   </tr>
                 )}
                 {Number(p.descuento_valor) > 0 && (
                   <tr>
                     <td className="border-[1.5px] px-1 py-1 bg-[#dce6f1] font-bold" colSpan={3} style={{ borderColor: 'var(--theme-color)' }}>SUBTOTAL CON DESCUENTO</td>
-                    <td className="border-[1.5px] px-1 py-1 text-right font-normal bg-[#ebf1f8]" style={{ borderColor: 'var(--theme-color)' }}><span className="float-left">$</span> {formatMoney(Number(p.subtotal))}</td>
+                    <td className="border-[1.5px] px-1 py-1 text-right font-normal bg-[#ebf1f8]" style={{ borderColor: 'var(--theme-color)' }}>{!hasUF && <span className="float-left">$</span>} {formatMoney(Number(p.subtotal))}</td>
                   </tr>
                 )}
                 {p.tipo_documento === 'FACTURA' && (
                   <tr>
                     <td className="border-[1.5px] px-1 py-1 bg-[#dce6f1] font-bold" colSpan={3} style={{ borderColor: 'var(--theme-color)' }}>IMPUESTOS IVA 19%</td>
-                    <td className="border-[1.5px] px-1 py-1 text-right font-normal bg-[#ebf1f8]" style={{ borderColor: 'var(--theme-color)' }}><span className="float-left">$</span> {formatMoney(Number(p.impuesto_total))}</td>
+                    <td className="border-[1.5px] px-1 py-1 text-right font-normal bg-[#ebf1f8]" style={{ borderColor: 'var(--theme-color)' }}>{!hasUF && <span className="float-left">$</span>} {formatMoney(Number(p.impuesto_total))}</td>
                   </tr>
                 )}
                 <tr>
                   <td className="border-[1.5px] px-1 py-1 bg-[#dce6f1] font-bold" colSpan={3} style={{ borderColor: 'var(--theme-color)' }}>TOTAL</td>
-                  <td className="border-[1.5px] px-1 py-1 text-right font-bold bg-[#ebf1f8]" style={{ borderColor: 'var(--theme-color)' }}><span className="float-left">$</span> {formatMoney(Number(p.total))}</td>
+                  <td className="border-[1.5px] px-1 py-1 text-right font-bold bg-[#ebf1f8]" style={{ borderColor: 'var(--theme-color)' }}>{!hasUF && <span className="float-left">$</span>} {formatMoney(Number(p.total))}</td>
                 </tr>
               </tbody>
             </table>
